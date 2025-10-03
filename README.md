@@ -5,3 +5,5 @@ python3 -m venv .venv  && source .venv/bin/activate
 pip install -r AI_AGENT_COMPETITOR_ANALYZER/requirements.txt
 adk web
 ```
+
+ALSO SET YOUR API KEY IN AI_AGENT_COMPETITOR_ANALYZER/.env . 
