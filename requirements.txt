@@ -111,3 +111,5 @@ uvicorn==0.37.0
 watchdog==6.0.0
 websockets==15.0.1
 zipp==3.23.0
+Flask
+Flask-Cors
