@@ -2099,7 +2099,7 @@ def run_intelligence_check(
         send_email: Send report via email if configured (default: False)
     
     Returns:
-        Intelligence report with competitor updates and analysis
+        A JSON string representing the findings of the intelligence check.
     """
     logger.info("=" * 70)
     logger.info("Starting intelligence check...")
@@ -2109,46 +2109,40 @@ def run_intelligence_check(
     engine = MonitoringEngine()
     findings = engine.monitor_all()
     
+    # Update state
+    tool_context.state['last_check'] = datetime.now().isoformat()
+    tool_context.state['last_findings_count'] = len(findings)
+
     if not findings:
-        message = "✅ **No New Updates Detected**\n\n" + \
-                 "All enabled competitors have been scanned. No new activity found since last check.\n\n" + \
-                 "This is normal - it means your competitors haven't made significant public changes recently."
-        
-        tool_context.state['last_check'] = datetime.now().isoformat()
-        tool_context.state['last_findings_count'] = 0
-        
-        return message
-    
-    # Generate report
-    report = ReportGenerator.generate_digest(findings, format)
-    
+        return json.dumps({
+            "status": "No new updates detected",
+            "message": "All enabled competitors have been scanned. No new activity found since last check."
+        })
+
     # Save report
-    report_path = ReportGenerator.save_report(report)
-    
+    report = ReportGenerator.generate_digest(findings, format)
+    ReportGenerator.save_report(report)
+
     # Export if configured
     if config.export_after_check:
         ExportManager.export_to_json(findings)
         ExportManager.export_to_csv(findings)
-    
+
     # Send email if requested
-    email_status = ""
     if send_email or (config.notification_email and findings):
         notifier = EmailNotifier(config)
-        if notifier.send_digest(report, len(findings)):
-            email_status = f"\n\n📧 Report emailed to {config.notification_email}"
-        else:
-            email_status = "\n\n⚠️ Email sending failed (check SMTP configuration)"
-    
-    # Update state
-    tool_context.state['last_check'] = datetime.now().isoformat()
-    tool_context.state['last_findings_count'] = len(findings)
-    
-    summary = f"🎯 **{len(findings)} Competitor Update(s) Found**\n\n"
-    summary += f"Report saved: `{report_path.name}`{email_status}\n\n"
-    summary += "---\n\n"
-    summary += report
-    
-    return summary
+        notifier.send_digest(report, len(findings))
+
+    # Convert dataclasses to dicts for JSON serialization
+    serializable_findings = []
+    for finding in findings:
+        serializable_findings.append({
+            'competitor': asdict(finding['competitor']),
+            'updates': [asdict(u) for u in finding['updates']],
+            'analysis': asdict(finding['analysis'])
+        })
+
+    return json.dumps(serializable_findings)
 
 @FunctionTool
 def add_competitor(
@@ -2241,81 +2235,14 @@ def list_competitors(tool_context: "ToolContext", show_disabled: bool = True) ->
         show_disabled: Include disabled competitors in the list (default: True)
     
     Returns:
-        Formatted list of competitors
+        A JSON string representing the list of competitors.
     """
     competitors = load_competitors()
     
-    if not competitors:
-        return "📭 **No competitors are currently being tracked.**\n\n" + \
-               "Use `add_competitor` to start monitoring competitors.\n\n" + \
-               "**Quick start example:**\n" + \
-               "```\n" + \
-               "add_competitor(\n" + \
-               "  name='CompetitorName',\n" + \
-               "  website_url='https://competitor.com/blog',\n" + \
-               "  category='SaaS'\n" + \
-               ")\n" + \
-               "```"
-    
-    # Filter if needed
     if not show_disabled:
         competitors = [c for c in competitors if c.enabled]
-    
-    # Group by priority
-    by_priority = {'High': [], 'Medium': [], 'Low': []}
-    for comp in competitors:
-        by_priority[comp.priority].append(comp)
-    
-    enabled_count = sum(1 for c in competitors if c.enabled)
-    disabled_count = len(competitors) - enabled_count
-    
-    result = f"# 📊 Tracked Competitors\n\n"
-    result += f"**Total:** {len(competitors)} | **Active:** {enabled_count} | **Disabled:** {disabled_count}\n\n"
-    
-    for priority in ['High', 'Medium', 'Low']:
-        if by_priority[priority]:
-            emoji = {"High": "🔴", "Medium": "🟡", "Low": "🟢"}[priority]
-            result += f"## {emoji} {priority} Priority ({len(by_priority[priority])})\n\n"
-            
-            for comp in by_priority[priority]:
-                status_emoji = "✅" if comp.enabled else "❌"
-                result += f"### {status_emoji} {comp.name}\n\n"
-                result += f"- **Status:** {'Active' if comp.enabled else 'Disabled'}\n"
-                result += f"- **Category:** {comp.category}\n"
-                
-                # Sources
-                sources = []
-                if comp.website_url:
-                    sources.append(f"[Website]({comp.website_url})")
-                if comp.rss_feed_url:
-                    sources.append("RSS ⭐")
-                if comp.twitter_handle:
-                    sources.append(f"Twitter (@{comp.twitter_handle})")
-                if comp.linkedin_url:
-                    sources.append("LinkedIn")
-                if comp.press_release_url:
-                    sources.append("Press")
-                
-                result += f"- **Sources:** {', '.join(sources) if sources else 'None configured'}\n"
-                
-                if comp.tags:
-                    result += f"- **Tags:** {', '.join(comp.tags)}\n"
-                
-                result += f"- **Added:** {comp.added_at[:10]}\n"
-                
-                if comp.last_checked:
-                    last_check = datetime.fromisoformat(comp.last_checked)
-                    result += f"- **Last Checked:** {last_check.strftime('%b %d at %I:%M %p')}\n"
-                
-                result += "\n"
-    
-    result += "---\n\n"
-    result += "💡 **Tips:**\n"
-    result += "- Use `check_single_competitor('name')` to check a specific competitor\n"
-    result += "- Use `toggle_competitor('name')` to enable/disable monitoring\n"
-    result += "- Use `view_competitor_trends('name')` to see historical patterns\n"
-    
-    return result
+
+    return json.dumps([asdict(c) for c in competitors])
 
 @FunctionTool
 def remove_competitor(name: str, tool_context: "ToolContext", confirm: bool = False) -> str:
