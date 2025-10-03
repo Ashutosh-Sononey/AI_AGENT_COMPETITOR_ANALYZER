@@ -24,7 +24,8 @@ Start the ADK API server. The crucial `--cors-origins` flag allows the frontend 
 
 ```bash
 # From the project root directory
-adk api_server --cors-origins http://localhost:3000
+# Note: We allow both port 3000 and 3001 for the frontend to avoid issues if port 3000 is occupied.
+adk api_server --cors-origins http://localhost:3000 http://localhost:3001
 ```
 
 The backend will be running on `http://127.0.0.1:8000`.
