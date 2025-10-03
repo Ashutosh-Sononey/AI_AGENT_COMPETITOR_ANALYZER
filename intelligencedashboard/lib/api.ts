@@ -1,3 +1,7 @@
+// This file implements the correct pattern for interacting with the ADK API.
+// Instead of calling tools directly, it sends natural language prompts to the
+// agent's `/run` endpoint and parses the JSON from the final response.
+
 export interface Competitor {
   name: string;
   enabled: boolean;
@@ -38,53 +42,85 @@ export interface Finding {
     analysis: Analysis;
 }
 
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const APP_NAME = 'intel_tracker'; // As defined in agent.py
+const USER_ID = 'dashboard-user';
+const SESSION_ID = 'main-session';
 
-async function callTool(toolName: string, args: Record<string, any> = {}): Promise<any> {
+/**
+ * A generic function to run a query against the ADK agent.
+ * It sends a prompt and expects a JSON response in the agent's final output.
+ * @param prompt The natural language prompt to send to the agent.
+ * @returns The parsed JSON object from the agent's response.
+ */
+async function runAgentQuery(prompt: string): Promise<any> {
   try {
-    const response = await fetch(`${API_URL}/tools/${toolName}`, {
+    const response = await fetch(`${API_URL}/run`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      body: JSON.stringify({ args }),
+      body: JSON.stringify({
+        app_name: APP_NAME,
+        user_id: USER_ID,
+        session_id: SESSION_ID,
+        new_message: {
+          role: "user",
+          parts: [{ "text": prompt }]
+        }
+      }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`API call to ${toolName} failed with status ${response.status}:`, errorText);
-      throw new Error(`API call to ${toolName} failed: ${errorText}`);
+      console.error(`Agent query failed with status ${response.status}:`, errorText);
+      throw new Error(`Agent query failed: ${errorText}`);
     }
 
-    const result = await response.json();
+    const events = await response.json();
 
-    if (result && typeof result.output === 'string') {
-      // The backend returns a JSON string in the output field
-      return JSON.parse(result.output);
+    // The response is an array of events. We need the last "model" response.
+    const lastModelPart = events
+      .slice()
+      .reverse()
+      .find((e: any) => e.content?.role === 'model' && e.content?.parts?.[0]?.text)
+      ?.content.parts[0].text;
+
+    if (lastModelPart) {
+      try {
+        // The agent's response is expected to be a JSON string
+        return JSON.parse(lastModelPart);
+      } catch (e) {
+        console.error("Failed to parse JSON from agent's response:", lastModelPart);
+        // Fallback for non-json responses, like conversational ones
+        return lastModelPart;
+      }
     }
 
-    console.error('Invalid response format from tool', toolName, result);
-    throw new Error(`Invalid response format from tool ${toolName}`);
+    console.error('No valid model response found in events', events);
+    throw new Error('No valid model response found');
   } catch (error) {
-    console.error(`Error calling tool ${toolName}:`, error);
+    console.error(`Error in runAgentQuery for prompt "${prompt}":`, error);
     throw error;
   }
 }
 
-export async function getCompetitors(showDisabled: boolean = true): Promise<Competitor[]> {
-  return await callTool('list_competitors', { show_disabled: showDisabled });
+export async function getCompetitors(): Promise<Competitor[]> {
+  // Explicitly ask for the 'json' output format for robust parsing.
+  const prompt = "call list_competitors with output_format='json'";
+  return await runAgentQuery(prompt);
 }
 
 export async function addCompetitor(name: string, website_url: string, category: string, priority: string, tags: string, rss_feed_url?: string): Promise<string> {
-    const args: any = { name, website_url, category, priority, tags };
-    if (rss_feed_url) {
-        args.rss_feed_url = rss_feed_url;
-    }
-    return await callTool('add_competitor', args);
+    const rssPart = rss_feed_url ? `and rss feed ${rss_feed_url}` : '';
+    // Ask for a human-readable response for the toast message.
+    const prompt = `add a new competitor named "${name}" with website url "${website_url}", category "${category}", priority "${priority}", and tags "${tags}" ${rssPart}. Respond with a success message.`;
+    return await runAgentQuery(prompt);
 }
 
 export async function runIntelligenceCheck(): Promise<Finding[] | { status: string; message: string }> {
-    return await callTool('run_intelligence_check', { format: 'summary' });
+    // Explicitly ask for the 'json' output format for robust parsing.
+    const prompt = "call run_intelligence_check with output_format='json'";
+    return await runAgentQuery(prompt);
 }

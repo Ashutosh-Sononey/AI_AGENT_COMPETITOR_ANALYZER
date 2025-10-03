@@ -9,22 +9,23 @@ import {
   BarChartIcon,
   Sprout,
   RefreshCw,
-  LineChart as LineChartIcon,
-  Terminal,
+  Calendar,
+  Users as UsersIcon,
+  Activity as ActivityIcon,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useLanguage } from "@/lib/language-context"
 import { useUser } from "@/lib/user-context"
 import { getCompetitors, runIntelligenceCheck, Competitor, Finding } from "@/lib/api"
 import { AddCompetitorDialog } from "./add-competitor-dialog"
 import { Toaster } from "@/components/ui/toaster"
-import { useToast } from "./ui/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 
-// This component now fetches and displays real data from the backend API.
+// This component now fetches and displays real data from the backend API,
+// preserving the original UI structure.
 
 export function DashboardContent() {
   const { user } = useUser()
@@ -59,7 +60,6 @@ export function DashboardContent() {
       if (Array.isArray(initialFindings)) {
         setFindings(initialFindings)
       } else {
-        // Handle case where there are no new updates
         setFindings([])
         toast({ title: "Status", description: initialFindings.message })
       }
@@ -93,10 +93,10 @@ export function DashboardContent() {
 
         return {
           name: comp.name,
-          logo: `/logos/${comp.name.toLowerCase().replace(/\s+/g, '')}.png`, // Assume logos exist
+          logo: `/logos/${comp.name.toLowerCase().replace(/\s+/g, '')}.png`,
           features: analysis?.key_features?.length || 0,
           trend: analysis ? (impactScore > 2.5 ? "up" : "down") : "neutral",
-          lastUpdate: finding ? new Date(finding.updates[0].detected_at).toLocaleDateString() : 'N/A',
+          lastUpdate: comp.last_checked ? new Date(comp.last_checked).toLocaleDateString() : 'N/A',
           recentActivity: analysis?.summary || 'No recent analysis.',
           impact: analysis?.impact || 'Medium',
           threat: analysis?.threat_level || 'Low',
@@ -141,7 +141,6 @@ export function DashboardContent() {
           description: result.message,
         });
       }
-      // Also refresh the main competitor list to get new last_checked dates
       const refreshedCompetitors = await getCompetitors();
       setCompetitors(refreshedCompetitors);
     } catch (error) {
@@ -204,12 +203,12 @@ export function DashboardContent() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">{t("dashboard.total_features")}</CardTitle>
+              <CardTitle className="text-sm font-medium">Updates Analyzed</CardTitle>
               <ActivityIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalFeatures}</div>
-              <p className="text-xs text-muted-foreground">updates analyzed recently</p>
+              <div className="text-2xl font-bold">{newsItems.length}</div>
+              <p className="text-xs text-muted-foreground">in the last check</p>
             </CardContent>
           </Card>
 
@@ -336,46 +335,5 @@ export function DashboardContent() {
       </main>
       <Toaster />
     </>
-  )
-}
-
-function UsersIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  )
-}
-
-function ActivityIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-    </svg>
   )
 }

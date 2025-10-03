@@ -2089,17 +2089,19 @@ def view_company_context(tool_context: "ToolContext") -> str:
 def run_intelligence_check(
     tool_context: "ToolContext",
     format: str = "detailed",
-    send_email: bool = False
+    send_email: bool = False,
+    output_format: str = "markdown"
 ) -> str:
     """
     Run competitive intelligence check across all enabled competitors.
     
     Args:
-        format: Report format - 'brief', 'summary', or 'detailed' (default)
+        format: Report format for markdown - 'brief', 'summary', or 'detailed' (default)
         send_email: Send report via email if configured (default: False)
-    
+        output_format: The format of the output, 'markdown' or 'json' (default: 'markdown')
+
     Returns:
-        A JSON string representing the findings of the intelligence check.
+        Intelligence report with competitor updates and analysis.
     """
     logger.info("=" * 70)
     logger.info("Starting intelligence check...")
@@ -2109,40 +2111,44 @@ def run_intelligence_check(
     engine = MonitoringEngine()
     findings = engine.monitor_all()
     
-    # Update state
     tool_context.state['last_check'] = datetime.now().isoformat()
     tool_context.state['last_findings_count'] = len(findings)
 
     if not findings:
-        return json.dumps({
-            "status": "No new updates detected",
-            "message": "All enabled competitors have been scanned. No new activity found since last check."
-        })
+        no_updates_message = "✅ **No New Updates Detected**\n\nAll enabled competitors have been scanned."
+        if output_format == 'json':
+            return json.dumps({"status": "No new updates detected", "message": no_updates_message})
+        return no_updates_message
 
-    # Save report
+    # Always generate and save a report
     report = ReportGenerator.generate_digest(findings, format)
-    ReportGenerator.save_report(report)
+    report_path = ReportGenerator.save_report(report)
 
-    # Export if configured
-    if config.export_after_check:
-        ExportManager.export_to_json(findings)
-        ExportManager.export_to_csv(findings)
+    # Handle JSON output
+    if output_format == 'json':
+        serializable_findings = []
+        for finding in findings:
+            serializable_findings.append({
+                'competitor': asdict(finding['competitor']),
+                'updates': [asdict(u) for u in finding['updates']],
+                'analysis': asdict(finding['analysis'])
+            })
+        return json.dumps(serializable_findings)
 
-    # Send email if requested
+    # Default to markdown output
+    email_status = ""
     if send_email or (config.notification_email and findings):
         notifier = EmailNotifier(config)
-        notifier.send_digest(report, len(findings))
+        if notifier.send_digest(report, len(findings)):
+            email_status = f"\n\n📧 Report emailed to {config.notification_email}"
+        else:
+            email_status = "\n\n⚠️ Email sending failed"
 
-    # Convert dataclasses to dicts for JSON serialization
-    serializable_findings = []
-    for finding in findings:
-        serializable_findings.append({
-            'competitor': asdict(finding['competitor']),
-            'updates': [asdict(u) for u in finding['updates']],
-            'analysis': asdict(finding['analysis'])
-        })
+    summary = f"🎯 **{len(findings)} Competitor Update(s) Found**\n\n"
+    summary += f"Report saved: `{report_path.name}`{email_status}\n\n---\n\n"
+    summary += report
 
-    return json.dumps(serializable_findings)
+    return summary
 
 @FunctionTool
 def add_competitor(
@@ -2227,22 +2233,68 @@ def add_competitor(
            f"Run `run_intelligence_check` to start monitoring immediately, or it will be included in the next scheduled check."
 
 @FunctionTool
-def list_competitors(tool_context: "ToolContext", show_disabled: bool = True) -> str:
+def list_competitors(tool_context: "ToolContext", show_disabled: bool = True, output_format: str = "markdown") -> str:
     """
     Show all tracked competitors with their status and configuration.
     
     Args:
         show_disabled: Include disabled competitors in the list (default: True)
+        output_format: The format of the output, 'markdown' or 'json' (default: 'markdown')
     
     Returns:
-        A JSON string representing the list of competitors.
+        A list of competitors in the specified format.
     """
     competitors = load_competitors()
     
     if not show_disabled:
         competitors = [c for c in competitors if c.enabled]
 
-    return json.dumps([asdict(c) for c in competitors])
+    if output_format == 'json':
+        return json.dumps([asdict(c) for c in competitors])
+
+    # Default to markdown
+    if not competitors:
+        return "📭 **No competitors are currently being tracked.**"
+
+    by_priority = {'High': [], 'Medium': [], 'Low': []}
+    for comp in competitors:
+        by_priority[comp.priority].append(comp)
+
+    enabled_count = sum(1 for c in competitors if c.enabled)
+    disabled_count = len(competitors) - enabled_count
+
+    result = f"# 📊 Tracked Competitors\n\n"
+    result += f"**Total:** {len(competitors)} | **Active:** {enabled_count} | **Disabled:** {disabled_count}\n\n"
+
+    for priority in ['High', 'Medium', 'Low']:
+        if by_priority[priority]:
+            emoji = {"High": "🔴", "Medium": "🟡", "Low": "🟢"}[priority]
+            result += f"## {emoji} {priority} Priority ({len(by_priority[priority])})\n\n"
+
+            for comp in by_priority[priority]:
+                status_emoji = "✅" if comp.enabled else "❌"
+                result += f"### {status_emoji} {comp.name}\n\n"
+                result += f"- **Status:** {'Active' if comp.enabled else 'Disabled'}\n"
+                result += f"- **Category:** {comp.category}\n"
+
+                sources = []
+                if comp.website_url:
+                    sources.append(f"Website")
+                if comp.rss_feed_url:
+                    sources.append("RSS ⭐")
+
+                result += f"- **Sources:** {', '.join(sources) if sources else 'None configured'}\n"
+
+                if comp.tags:
+                    result += f"- **Tags:** {', '.join(comp.tags)}\n"
+
+                if comp.last_checked:
+                    last_check = datetime.fromisoformat(comp.last_checked)
+                    result += f"- **Last Checked:** {last_check.strftime('%b %d at %I:%M %p')}\n"
+
+                result += "\n"
+
+    return result
 
 @FunctionTool
 def remove_competitor(name: str, tool_context: "ToolContext", confirm: bool = False) -> str:
@@ -3141,7 +3193,12 @@ def get_status(tool_context: "ToolContext") -> str:
 root_agent = LlmAgent(
     name="intel_tracker",
     model="gemini-2.5-flash",
-    instruction="""You are IntelTracker, an advanced competitive intelligence assistant designed for startups and businesses.
+    instruction="""You are IntelTracker, an advanced competitive intelligence assistant.
+
+**IMPORTANT: Response Formatting**
+- When a user asks for data programmatically (e.g., "list competitors as json", "get data for dashboard"), you MUST return the raw, unformatted JSON output from the tool.
+- For conversational, human-readable responses, format the output as clear, readable markdown.
+
 **IMPORTANT: Company-Calibrated Analysis**
 You have access to the user's company context. Use it to:
 - Frame all analysis from THEIR perspective

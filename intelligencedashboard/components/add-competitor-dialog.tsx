@@ -67,8 +67,12 @@ export function AddCompetitorDialog({ onCompetitorAdded }: AddCompetitorDialogPr
         values.rss_feed_url || undefined,
       );
       toast({
-        title: "Success!",
-        description: `Competitor "${values.name}" has been added.`,
+        title: "Action Complete",
+        description: (
+          <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+            <code className="text-white">{result}</code>
+          </pre>
+        ),
       })
       form.reset();
       onCompetitorAdded(); // Refresh the list in the parent component
