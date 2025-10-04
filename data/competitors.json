@@ -1,0 +1,124 @@
+[
+  {
+    "name": "Linear",
+    "website_url": "https://linear.app/changelog",
+    "rss_feed_url": null,
+    "twitter_handle": null,
+    "linkedin_url": null,
+    "press_release_url": null,
+    "category": "Project Management",
+    "priority": "High",
+    "enabled": true,
+    "tags": [
+      "project-management",
+      "development"
+    ],
+    "added_at": "2025-10-03T08:38:14.599045",
+    "last_checked": "2025-10-04T22:33:24.294752"
+  },
+  {
+    "name": "Airtable",
+    "website_url": "https://www.airtable.com/whatsnew",
+    "rss_feed_url": null,
+    "twitter_handle": null,
+    "linkedin_url": null,
+    "press_release_url": null,
+    "category": "Database",
+    "priority": "Medium",
+    "enabled": true,
+    "tags": [
+      "database",
+      "no-code"
+    ],
+    "added_at": "2025-10-03T08:38:14.599050",
+    "last_checked": null
+  },
+  {
+    "name": "Arattai",
+    "website_url": "https://arattai.in",
+    "rss_feed_url": null,
+    "twitter_handle": null,
+    "linkedin_url": null,
+    "press_release_url": null,
+    "category": "Unknown",
+    "priority": "High",
+    "enabled": true,
+    "tags": [],
+    "added_at": "2025-10-03T10:03:54.377934",
+    "last_checked": "2025-10-04T22:33:36.540873"
+  },
+  {
+    "name": "Netlify",
+    "website_url": "https://www.netlify.com/changelog/",
+    "rss_feed_url": null,
+    "twitter_handle": null,
+    "linkedin_url": null,
+    "press_release_url": null,
+    "category": "Hosting, Web Development",
+    "priority": "High",
+    "enabled": true,
+    "tags": [],
+    "added_at": "2025-10-03T10:18:50.871063",
+    "last_checked": "2025-10-04T22:33:44.648809"
+  },
+  {
+    "name": "Railway",
+    "website_url": "https://railway.app/",
+    "rss_feed_url": null,
+    "twitter_handle": null,
+    "linkedin_url": null,
+    "press_release_url": null,
+    "category": "Hosting, Cloud Infrastructure",
+    "priority": "High",
+    "enabled": true,
+    "tags": [],
+    "added_at": "2025-10-03T10:18:50.874000",
+    "last_checked": "2025-10-04T22:33:54.643434"
+  },
+  {
+    "name": "Google",
+    "website_url": "https://labs.google/",
+    "rss_feed_url": null,
+    "twitter_handle": null,
+    "linkedin_url": null,
+    "press_release_url": null,
+    "category": "AI Research",
+    "priority": "High",
+    "enabled": true,
+    "tags": [],
+    "added_at": "2025-10-04T08:33:46.716547",
+    "last_checked": "2025-10-04T22:34:02.012524"
+  },
+  {
+    "name": "Notion",
+    "website_url": "https://www.notion.so/releases",
+    "rss_feed_url": null,
+    "twitter_handle": null,
+    "linkedin_url": null,
+    "press_release_url": null,
+    "category": "Productivity",
+    "priority": "High",
+    "enabled": true,
+    "tags": [],
+    "added_at": "2025-10-04T13:43:14.753418",
+    "last_checked": "2025-10-04T22:34:14.443192"
+  },
+  {
+    "name": "Tesla",
+    "website_url": "https://tesla.org",
+    "rss_feed_url": null,
+    "twitter_handle": null,
+    "linkedin_url": null,
+    "press_release_url": null,
+    "category": "Car",
+    "priority": "Medium",
+    "enabled": true,
+    "tags": [
+      "car",
+      "traditional",
+      "electric"
+    ],
+    "added_at": "2025-10-04T16:16:29.729132",
+    "last_checked": null
+  }
+]

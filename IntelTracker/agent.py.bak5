@@ -1,0 +1,261 @@
+# IntelTracker/agent.py
+#
+# A self-contained, multi-agent system for competitive intelligence,
+# designed to be run with the ADK CLI and interacted with via a REST API.
+#
+# Architecture:
+# 1. Tools: A suite of functions for data gathering, competitor management,
+#    and triggering complex agent workflows.
+# 2. Specialized Agents: LlmAgents for specific tasks like analysis,
+#    reporting, comparison, and prediction.
+# 3. Root Agent: A primary LlmAgent that acts as a central coordinator,
+#    understanding user intent and delegating to the appropriate tool or sub-agent.
+
+import os
+import json
+import hashlib
+import requests
+import feedparser
+from bs4 import BeautifulSoup
+from datetime import datetime
+from typing import Optional, TYPE_CHECKING
+
+# ADK Imports
+from google.adk.agents import LlmAgent
+from google.adk.tools import FunctionTool, AgentTool
+from google.adk.sessions import Session
+
+if TYPE_CHECKING:
+    from google.adk.tools import ToolContext
+
+# --- Configuration ---
+# Hardcoded competitor list for simplicity and reliability.
+# This can be dynamically overridden via session_state in a REST API call.
+FALLBACK_COMPETITORS_CONFIG = [
+    {
+        "name": "Notion",
+        "website_url": "https://www.notion.so/changelog",
+        "rss_feed_url": None
+    },
+    {
+        "name": "Figma",
+        "website_url": "https://twitter.com/figma",
+        "rss_feed_url": None
+    },
+    {
+        "name": "Canva",
+        "website_url": "https://www.canva.com/whats-new/",
+        "rss_feed_url": None
+    },
+    {
+        "name": "Slack",
+        "website_url": "https://slack.com/release-notes/windows",
+        "rss_feed_url": "https://slack.com/release-notes/rss"
+    },
+    {
+        "name": "Obsidian",
+        "website_url": "https://forum.obsidian.md/c/announcements/13",
+        "rss_feed_url": "https://forum.obsidian.md/c/announcements/13.rss"
+    }
+]
+
+
+# Configure Gemini API access
+try:
+    import google.generativeai as genai
+
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    if not GEMINI_API_KEY:
+        print("Warning: GEMINI_API_KEY not set. Reasoning agents will be disabled.")
+        genai = None
+    else:
+        genai.configure(api_key=GEMINI_API_KEY)
+except ImportError:
+    print("Warning: 'google-generativeai' is not installed. Reasoning agents will be disabled.")
+    genai = None
+
+# --- 1. Specialized Sub-Agents ---
+
+analysis_agent = LlmAgent(
+    name="analysis_agent",
+    model="gemini-2.5-flash" if genai else None,
+    instruction="""
+    You are a competitive intelligence analyst. Your input is a JSON string of raw observations about competitors.
+    Analyze each observation and produce a structured JSON output. The output MUST be a JSON list of objects.
+    Each object must contain: "competitor", "source", "link", and a "summary" of 2-3 bullet points on strategically important changes (product launches, feature updates, pricing, marketing campaigns).
+    If the input is an empty list, you MUST return an empty JSON list `[]`.
+    """,
+)
+
+reporting_agent = LlmAgent(
+    name="reporting_agent",
+    model="gemini-2.5-flash" if genai else None,
+    instruction="""
+    You are a reporting agent. Your input is structured JSON from the analysis_agent.
+    Format this JSON into a clean, human-readable markdown digest.
+    - Start with a main title: "Competitive Intelligence Digest" and the current date.
+    - For each item in the JSON, create a sub-header for the competitor.
+    - List the source, a bulleted list of the summary points, and the direct link.
+    - If the input is an empty list or null, your output should be the single sentence: "No significant competitor updates were found during this cycle."
+    """,
+)
+
+prediction_agent = LlmAgent(
+    name="prediction_agent",
+    model="gemini-2.5-flash" if genai else None,
+    instruction="""
+    You are a "Future Feature Intelligence" analyst. Based on the provided competitor updates (news, blog posts, website changes), predict potential future features or strategic shifts.
+    Your analysis should be grounded in the data provided.
+    Output a markdown-formatted section with a title "Future Outlook & Predictions" and 2-3 bullet points with your predictions and reasoning.
+    """,
+)
+
+comparison_agent = LlmAgent(
+    name="comparison_agent",
+    model="gemini-2.5-flash" if genai else None,
+    instruction="""
+    You are a "Smart Difference Finder" agent. You will receive two text inputs: 'product_a_description' and 'product_b_description'.
+    Generate a markdown-formatted, side-by-side comparison table highlighting the key feature differences.
+    Conclude with a "Smart Difference" summary: a single paragraph explaining the most significant unique selling proposition of Product A over Product B.
+    """,
+)
+
+export_agent = LlmAgent(
+    name="export_agent",
+    model="gemini-2.5-flash" if genai else None,
+    instruction="""
+    You are a data export agent. Your input is a JSON string of insights.
+    Your task is to format this data based on the requested 'export_format'.
+    - If 'export_format' is 'email', format it as a simple, clean HTML email body.
+    - If 'export_format' is 'pdf' or 'notion', format it as a detailed markdown document suitable for conversion.
+    - If 'export_format' is 'plaintext', format as a simple text summary.
+    If the input is empty, return a message indicating no data is available for export.
+    """
+)
+
+
+# --- 2. Tools (Agent Capabilities) ---
+
+# These are helper functions, not direct tools for the coordinator agent.
+def _monitor_website_change(competitor_name: str, url: str, tool_context: "ToolContext") -> dict | None:
+    """Monitors a single website for content changes."""
+    print(f"[{competitor_name}] Checking website: {url}")
+    try:
+        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        content_text = (soup.find('main') or soup.find('body')).get_text(' ', strip=True)
+        current_hash = hashlib.sha256(content_text.encode('utf-8')).hexdigest()
+        state_key = f"website_hash_{url}"
+        last_hash = tool_context.state.get(state_key)
+        if last_hash != current_hash:
+            tool_context.state[state_key] = current_hash
+            return {"type": "website_change", "competitor": competitor_name, "url": url, "content": content_text[:4000]}
+        return None
+    except requests.RequestException as e:
+        return {"type": "error", "competitor": competitor_name, "message": f"Error fetching website {url}: {e}"}
+
+def _monitor_rss_feed(competitor_name: str, url: str, tool_context: "ToolContext") -> list | None:
+    """Monitors a single RSS feed for new entries."""
+    if not url:
+        return None
+    print(f"[{competitor_name}] Checking RSS feed: {url}")
+    try:
+        feed = feedparser.parse(url)
+        state_key = f"seen_rss_entries_{url}"
+        seen_entries = set(tool_context.state.get(state_key, []))
+        new_posts = []
+        for entry in feed.entries:
+            entry_id = entry.get('id', entry.get('link'))
+            if entry_id not in seen_entries:
+                new_posts.append({"type": "new_blog_post", "competitor": competitor_name, "post": {"title": entry.title, "link": entry.link, "summary": BeautifulSoup(entry.summary, 'html.parser').get_text(strip=True)}})
+                seen_entries.add(entry_id)
+        if new_posts:
+            tool_context.state[state_key] = list(seen_entries)
+            return new_posts
+        return None
+    except Exception as e:
+        return [{"type": "error", "competitor": competitor_name, "message": f"Error fetching RSS feed {url}: {e}"}]
+
+@FunctionTool
+def run_monitoring_cycle(reason: str, tool_context: "ToolContext") -> str:
+    """Runs one full cycle of perceiving, analyzing, and reporting on competitors. Provide a brief reason for running it, e.g., 'user request'."""
+    print(f"\n>>> Starting a full monitoring cycle (Reason: {reason})...")
+    competitors = tool_context.state.get("competitors_config", FALLBACK_COMPETITORS_CONFIG)
+    observations = []
+    for competitor in competitors:
+        name = competitor.get("name", "Unknown")
+        if url := competitor.get("website_url"):
+            if result := _monitor_website_change(competitor_name=name, url=url, tool_context=tool_context):
+                observations.append(result)
+        if url := competitor.get("rss_feed_url"):
+            if results := _monitor_rss_feed(competitor_name=name, url=url, tool_context=tool_context):
+                observations.extend(results)
+
+    if not observations:
+        return "No significant competitor updates were found during this cycle."
+
+    analysis_json_str = analysis_agent.run(request=json.dumps(observations)).output
+    final_report = reporting_agent.run(request=analysis_json_str).output
+    print(final_report) # Also print to console for live monitoring
+    return final_report
+
+@FunctionTool
+def add_competitor(name: str, website_url: str, tool_context: "ToolContext", rss_feed_url: Optional[str] = None) -> str:
+    """Adds a new competitor to the monitoring list for this session."""
+    competitors = tool_context.state.get("competitors_config", FALLBACK_COMPETITORS_CONFIG)
+    # Create a copy to avoid modifying the fallback list in-place
+    competitors_copy = list(competitors)
+    competitors_copy.append({"name": name, "website_url": website_url, "rss_feed_url": rss_feed_url})
+    tool_context.state["competitors_config"] = competitors_copy
+    return f"Success! Added '{name}' to the monitoring list."
+
+@FunctionTool
+def remove_competitor(name: str, tool_context: "ToolContext") -> str:
+    """Removes a competitor from the monitoring list for this session."""
+    competitors = tool_context.state.get("competitors_config", FALLBACK_COMPETITORS_CONFIG)
+    # Create a copy to avoid modifying the fallback list in-place
+    competitors_copy = [c for c in competitors if c.get("name") != name]
+    tool_context.state["competitors_config"] = competitors_copy
+    return f"Success! Removed '{name}' from the monitoring list."
+
+
+@FunctionTool
+def list_competitors(reason: str, tool_context: "ToolContext") -> str:
+    """Lists all competitors currently being monitored in this session. Provide a brief reason for listing them, e.g., 'user request'."""
+    competitors = tool_context.state.get("competitors_config", FALLBACK_COMPETITORS_CONFIG)
+    return json.dumps(competitors, indent=2)
+
+@FunctionTool
+def compare_features(product_a_description: str, product_b_description: str) -> str:
+    """Uses the ComparisonAgent to compare two product descriptions."""
+    return comparison_agent.run(request=json.dumps({
+        "product_a_description": product_a_description,
+        "product_b_description": product_b_description
+    })).output
+
+# --- 3. Root Agent (The Coordinator) ---
+
+root_agent = LlmAgent(
+    name="intel_tracker_coordinator",
+    model="gemini-2.5-flash" if genai else None,
+    instruction="""
+    You are the coordinator for a competitive intelligence platform.
+    Your job is to understand the user's request and use the available tools to fulfill it.
+    - If the user wants to check for updates, call the `run_monitoring_cycle` tool with a reason.
+    - If the user wants to add, list, or remove a competitor, use the competitor management tools.
+    - If the user asks for a comparison, use the comparison tool.
+    - If the user asks for predictions or future outlook, use the `prediction_agent`.
+    - If the user asks to export data, use the `export_agent`.
+    Always be ready to perform the core task of running a monitoring cycle.
+    """,
+    tools=[
+        run_monitoring_cycle,
+        add_competitor,
+        remove_competitor,
+        list_competitors,
+        compare_features,
+        AgentTool(agent=prediction_agent),
+        AgentTool(agent=export_agent)
+    ],
+)

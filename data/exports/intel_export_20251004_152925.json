@@ -1,0 +1,826 @@
+{
+  "exported_at": "2025-10-04T15:29:25.538460",
+  "export_version": "12.0",
+  "company_context": {
+    "company_name": "Vercel",
+    "product_name": "Vercel",
+    "industry": "SAAS",
+    "target_market": "Developer",
+    "key_features": [
+      "Hosting",
+      "webpages",
+      "servers",
+      "js libraries"
+    ],
+    "differentiation": "Simplicity",
+    "current_focus": "growing userbase",
+    "company_stage": "Startup",
+    "team_size": "100",
+    "positioning": "private",
+    "strategic_goals": [
+      "Amass 10 million MAUs"
+    ],
+    "updated_at": "2025-10-03T10:17:24.831355"
+  },
+  "monitoring_config": {
+    "check_interval_hours": 24,
+    "enable_scheduling": false,
+    "notification_email": "ashutoshsononey@gmail.com",
+    "smtp_server": "smtp.gmail.com",
+    "smtp_port": 587,
+    "smtp_username": "ashutoshsononey@gmail.com",
+    "smtp_password": "eial vfct ewid xqbj",
+    "max_updates_per_competitor": 5,
+    "min_impact_level": "Low",
+    "digest_format": "detailed",
+    "notify_on_critical": true,
+    "notify_on_high": true,
+    "export_after_check": false,
+    "rate_limit_seconds": 2
+  },
+  "competitors": {
+    "total": 8,
+    "enabled": 8,
+    "list": [
+      {
+        "name": "Linear",
+        "website_url": "https://linear.app/changelog",
+        "rss_feed_url": null,
+        "twitter_handle": null,
+        "linkedin_url": null,
+        "press_release_url": null,
+        "category": "Project Management",
+        "priority": "High",
+        "enabled": true,
+        "tags": [
+          "project-management",
+          "development"
+        ],
+        "added_at": "2025-10-03T08:38:14.599045",
+        "last_checked": "2025-10-04T14:55:58.331654"
+      },
+      {
+        "name": "Airtable",
+        "website_url": "https://www.airtable.com/whatsnew",
+        "rss_feed_url": null,
+        "twitter_handle": null,
+        "linkedin_url": null,
+        "press_release_url": null,
+        "category": "Database",
+        "priority": "Medium",
+        "enabled": true,
+        "tags": [
+          "database",
+          "no-code"
+        ],
+        "added_at": "2025-10-03T08:38:14.599050",
+        "last_checked": null
+      },
+      {
+        "name": "Arattai",
+        "website_url": "https://arattai.in",
+        "rss_feed_url": null,
+        "twitter_handle": null,
+        "linkedin_url": null,
+        "press_release_url": null,
+        "category": "Unknown",
+        "priority": "High",
+        "enabled": true,
+        "tags": [],
+        "added_at": "2025-10-03T10:03:54.377934",
+        "last_checked": "2025-10-04T14:56:04.130846"
+      },
+      {
+        "name": "Netlify",
+        "website_url": "https://www.netlify.com/changelog/",
+        "rss_feed_url": null,
+        "twitter_handle": null,
+        "linkedin_url": null,
+        "press_release_url": null,
+        "category": "Hosting, Web Development",
+        "priority": "High",
+        "enabled": true,
+        "tags": [],
+        "added_at": "2025-10-03T10:18:50.871063",
+        "last_checked": "2025-10-04T14:56:06.621350"
+      },
+      {
+        "name": "Railway",
+        "website_url": "https://railway.app/",
+        "rss_feed_url": null,
+        "twitter_handle": null,
+        "linkedin_url": null,
+        "press_release_url": null,
+        "category": "Hosting, Cloud Infrastructure",
+        "priority": "High",
+        "enabled": true,
+        "tags": [],
+        "added_at": "2025-10-03T10:18:50.874000",
+        "last_checked": "2025-10-04T14:56:11.651009"
+      },
+      {
+        "name": "Google",
+        "website_url": "https://labs.google/",
+        "rss_feed_url": null,
+        "twitter_handle": null,
+        "linkedin_url": null,
+        "press_release_url": null,
+        "category": "AI Research",
+        "priority": "High",
+        "enabled": true,
+        "tags": [],
+        "added_at": "2025-10-04T08:33:46.716547",
+        "last_checked": "2025-10-04T14:56:13.787016"
+      },
+      {
+        "name": "Tesla",
+        "website_url": "https://tesla.com",
+        "rss_feed_url": null,
+        "twitter_handle": null,
+        "linkedin_url": null,
+        "press_release_url": null,
+        "category": "Unknown",
+        "priority": "Medium",
+        "enabled": true,
+        "tags": [],
+        "added_at": "2025-10-04T12:42:06.636548",
+        "last_checked": null
+      },
+      {
+        "name": "Notion",
+        "website_url": "https://www.notion.so/releases",
+        "rss_feed_url": null,
+        "twitter_handle": null,
+        "linkedin_url": null,
+        "press_release_url": null,
+        "category": "Productivity",
+        "priority": "High",
+        "enabled": true,
+        "tags": [],
+        "added_at": "2025-10-04T13:43:14.753418",
+        "last_checked": "2025-10-04T14:56:19.238821"
+      }
+    ]
+  },
+  "trends": {
+    "Notion": {
+      "history": [
+        {
+          "timestamp": "2025-10-03T08:38:22.656622",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "Follow @NotionHQ",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T08:44:42.457256",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "Follow @NotionHQ",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T09:32:54.235351",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025",
+            "July 22, 2025"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T09:58:19.412641",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "Follow @NotionHQ",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T10:01:12.282784",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "Follow @NotionHQ",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T10:37:57.104097",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "Follow @NotionHQ",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T08:28:44.034190",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "Follow @NotionHQ",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:46:33.107211",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "Follow @NotionHQ",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T14:55:48.683287",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Notion released: What\u2019s New",
+          "key_features": [
+            "What\u2019s New",
+            "Follow @NotionHQ",
+            "September 18, 2025",
+            "Previous releases",
+            "August 19, 2025"
+          ]
+        }
+      ],
+      "impact_counts": {
+        "High": 9
+      },
+      "feature_mentions": {
+        "what\u2019s": 9,
+        "follow": 8,
+        "@notionhq": 8,
+        "september": 9,
+        "releases": 9,
+        "previous": 9,
+        "august": 9
+      }
+    },
+    "Linear": {
+      "history": [
+        {
+          "timestamp": "2025-10-03T08:38:31.245888",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T08:44:52.432929",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T09:33:02.738628",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T09:58:28.224352",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T10:01:19.721388",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T10:38:08.818170",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T08:28:54.282651",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:39:15.453782",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:45:46.472632",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T14:54:51.918344",
+          "impact": "High",
+          "threat_level": "Medium",
+          "summary": "Linear released: Issue discussion summaries",
+          "key_features": [
+            "Issue discussion summaries",
+            "New to Product Intelligence: Auto-apply triage suggestions",
+            "Salesforce integration",
+            "Cursor background agents",
+            "Product Intelligence (Technology Preview)"
+          ]
+        }
+      ],
+      "impact_counts": {
+        "High": 10
+      },
+      "feature_mentions": {
+        "issue": 10,
+        "summaries": 10,
+        "discussion": 10,
+        "intelligence:": 10,
+        "product": 20,
+        "auto-apply": 10,
+        "triage": 10,
+        "suggestions": 10,
+        "salesforce": 10,
+        "integration": 10,
+        "agents": 10,
+        "cursor": 10,
+        "background": 10,
+        "preview)": 10,
+        "(technology": 10,
+        "intelligence": 10
+      }
+    },
+    "Arattai": {
+      "history": [
+        {
+          "timestamp": "2025-10-03T10:04:23.334887",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Arattai released: Communicate",
+          "key_features": [
+            "Communicate",
+            "Emote",
+            "Reach",
+            "Share",
+            "Secure"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T10:38:22.571238",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Arattai released: Communicate",
+          "key_features": [
+            "Communicate",
+            "Emote",
+            "Reach",
+            "Share",
+            "Secure"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T08:29:08.077133",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Arattai released: Communicate",
+          "key_features": [
+            "Communicate",
+            "Emote",
+            "Reach",
+            "Share",
+            "Secure"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:39:29.637077",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Arattai released: Communicate",
+          "key_features": [
+            "Communicate",
+            "Emote",
+            "Reach",
+            "Share",
+            "Secure"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:46:00.436019",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Arattai released: Communicate",
+          "key_features": [
+            "Communicate",
+            "Emote",
+            "Reach",
+            "Share",
+            "Secure"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T14:55:07.834162",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Arattai released: Communicate",
+          "key_features": [
+            "Communicate",
+            "Emote",
+            "Reach",
+            "Share",
+            "Secure"
+          ]
+        }
+      ],
+      "impact_counts": {
+        "Medium": 6
+      },
+      "feature_mentions": {
+        "communicate": 6,
+        "emote": 6,
+        "reach": 6,
+        "share": 6,
+        "secure": 6
+      }
+    },
+    "Netlify": {
+      "history": [
+        {
+          "timestamp": "2025-10-03T10:19:13.888968",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Netlify released: Add-on credit rates (effective immediately)",
+          "key_features": [
+            "Add-on credit rates (effective immediately)",
+            "Permalink to Updates to credit-based Personal and Pro plansPermalink",
+            "update to a credit-based plan",
+            "Permalink to New AI workflows: Agent Runners and AI Gateway (beta)Permalink",
+            "switch to our new credit-based plans"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T10:38:31.613657",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Netlify released: Add-on credit rates (effective immediately)",
+          "key_features": [
+            "Add-on credit rates (effective immediately)",
+            "Permalink to Updates to credit-based Personal and Pro plansPermalink",
+            "update to a credit-based plan",
+            "Permalink to New AI workflows: Agent Runners and AI Gateway (beta)Permalink",
+            "switch to our new credit-based plans"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T08:29:15.492185",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Netlify released: Add-on credit rates (effective immediately)",
+          "key_features": [
+            "Add-on credit rates (effective immediately)",
+            "Permalink to Updates to credit-based Personal and Pro plansPermalink",
+            "update to a credit-based plan",
+            "Permalink to New AI workflows: Agent Runners and AI Gateway (beta)Permalink",
+            "switch to our new credit-based plans"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:39:36.580490",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Netlify released: Add-on credit rates (effective immediately)",
+          "key_features": [
+            "Add-on credit rates (effective immediately)",
+            "Permalink to Updates to credit-based Personal and Pro plansPermalink",
+            "update to a credit-based plan",
+            "Permalink to New AI workflows: Agent Runners and AI Gateway (beta)Permalink",
+            "switch to our new credit-based plans"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:46:07.441465",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Netlify released: Add-on credit rates (effective immediately)",
+          "key_features": [
+            "Add-on credit rates (effective immediately)",
+            "Permalink to Updates to credit-based Personal and Pro plansPermalink",
+            "update to a credit-based plan",
+            "Permalink to New AI workflows: Agent Runners and AI Gateway (beta)Permalink",
+            "switch to our new credit-based plans"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T14:55:16.780641",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Netlify released: Add-on credit rates (effective immediately)",
+          "key_features": [
+            "Add-on credit rates (effective immediately)",
+            "Permalink to Updates to credit-based Personal and Pro plansPermalink",
+            "update to a credit-based plan",
+            "Permalink to New AI workflows: Agent Runners and AI Gateway (beta)Permalink",
+            "switch to our new credit-based plans"
+          ]
+        }
+      ],
+      "impact_counts": {
+        "Medium": 6
+      },
+      "feature_mentions": {
+        "immediately)": 6,
+        "(effective": 6,
+        "credit": 6,
+        "rates": 6,
+        "add-on": 6,
+        "credit-based": 18,
+        "planspermalink": 6,
+        "personal": 6,
+        "updates": 6,
+        "permalink": 12,
+        "(beta)permalink": 6,
+        "runners": 6,
+        "gateway": 6,
+        "workflows:": 6,
+        "agent": 6,
+        "plans": 6,
+        "switch": 6
+      }
+    },
+    "Railway": {
+      "history": [
+        {
+          "timestamp": "2025-10-03T10:19:22.679766",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Railway released: A better future is now boardingDeploy your first project today",
+          "key_features": [
+            "A better future is now boardingDeploy your first project today",
+            "Interconnect your application seamlessly with highly performant networkingInterconnect apps seamlessly with highly performant networking",
+            "Scale your applications with intuitive vertical and horizontal scalingScale your applications with intuitive vertical and horizontal scaling",
+            "Accelerate your development lifecycle with environments, staged changes, and pull request deploysAccelerate your development lifecycle with collaboration"
+          ]
+        },
+        {
+          "timestamp": "2025-10-03T10:38:40.376788",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Railway released: A better future is now boardingDeploy your first project today",
+          "key_features": [
+            "A better future is now boardingDeploy your first project today",
+            "Interconnect your application seamlessly with highly performant networkingInterconnect apps seamlessly with highly performant networking",
+            "Scale your applications with intuitive vertical and horizontal scalingScale your applications with intuitive vertical and horizontal scaling",
+            "Accelerate your development lifecycle with environments, staged changes, and pull request deploysAccelerate your development lifecycle with collaboration"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T08:29:25.452287",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Railway released: A better future is now boardingDeploy your first project today",
+          "key_features": [
+            "A better future is now boardingDeploy your first project today",
+            "Interconnect your application seamlessly with highly performant networkingInterconnect apps seamlessly with highly performant networking",
+            "Scale your applications with intuitive vertical and horizontal scalingScale your applications with intuitive vertical and horizontal scaling",
+            "Accelerate your development lifecycle with environments, staged changes, and pull request deploysAccelerate your development lifecycle with collaboration"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:39:46.489223",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Railway released: A better future is now boardingDeploy your first project today",
+          "key_features": [
+            "A better future is now boardingDeploy your first project today",
+            "Interconnect your application seamlessly with highly performant networkingInterconnect apps seamlessly with highly performant networking",
+            "Scale your applications with intuitive vertical and horizontal scalingScale your applications with intuitive vertical and horizontal scaling",
+            "Accelerate your development lifecycle with environments, staged changes, and pull request deploysAccelerate your development lifecycle with collaboration"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:46:16.304168",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Railway released: A better future is now boardingDeploy your first project today",
+          "key_features": [
+            "A better future is now boardingDeploy your first project today",
+            "Interconnect your application seamlessly with highly performant networkingInterconnect apps seamlessly with highly performant networking",
+            "Scale your applications with intuitive vertical and horizontal scalingScale your applications with intuitive vertical and horizontal scaling",
+            "Accelerate your development lifecycle with environments, staged changes, and pull request deploysAccelerate your development lifecycle with collaboration"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T14:55:28.172386",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Railway released: A better future is now boardingDeploy your first project today",
+          "key_features": [
+            "A better future is now boardingDeploy your first project today",
+            "Interconnect your application seamlessly with highly performant networkingInterconnect apps seamlessly with highly performant networking",
+            "Scale your applications with intuitive vertical and horizontal scalingScale your applications with intuitive vertical and horizontal scaling",
+            "Accelerate your development lifecycle with environments, staged changes, and pull request deploysAccelerate your development lifecycle with collaboration"
+          ]
+        }
+      ],
+      "impact_counts": {
+        "Medium": 6
+      },
+      "feature_mentions": {
+        "future": 6,
+        "better": 6,
+        "first": 6,
+        "project": 6,
+        "today": 6,
+        "boardingdeploy": 6,
+        "highly": 6,
+        "performant": 6,
+        "seamlessly": 6,
+        "networking": 6,
+        "networkinginterconnect": 6,
+        "interconnect": 6,
+        "application": 6,
+        "vertical": 6,
+        "scalingscale": 6,
+        "horizontal": 6,
+        "applications": 6,
+        "scaling": 6,
+        "intuitive": 6,
+        "scale": 6,
+        "collaboration": 6,
+        "environments,": 6,
+        "lifecycle": 6,
+        "development": 6,
+        "accelerate": 6,
+        "request": 6,
+        "deploysaccelerate": 6,
+        "staged": 6,
+        "changes,": 6
+      }
+    },
+    "Google": {
+      "history": [
+        {
+          "timestamp": "2025-10-04T09:26:34.521679",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Google released: Mixboard is an experimental, AI-powered concepting board designed to help you explore, expand and refine your ideas",
+          "key_features": [
+            "Mixboard is an experimental, AI-powered concepting board designed to help you explore, expand and refine your ideas",
+            "Try It Now"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:39:52.541588",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Google released: Mixboard is an experimental, AI-powered concepting board designed to help you explore, expand and refine your ideas",
+          "key_features": [
+            "Mixboard is an experimental, AI-powered concepting board designed to help you explore, expand and refine your ideas",
+            "Try It Now"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T13:46:22.864230",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Google released: Mixboard is an experimental, AI-powered concepting board designed to help you explore, expand and refine your ideas",
+          "key_features": [
+            "Mixboard is an experimental, AI-powered concepting board designed to help you explore, expand and refine your ideas",
+            "Try It Now"
+          ]
+        },
+        {
+          "timestamp": "2025-10-04T14:55:37.220146",
+          "impact": "Medium",
+          "threat_level": "Low",
+          "summary": "Google released: Mixboard is an experimental, AI-powered concepting board designed to help you explore, expand and refine your ideas",
+          "key_features": [
+            "Mixboard is an experimental, AI-powered concepting board designed to help you explore, expand and refine your ideas",
+            "Try It Now"
+          ]
+        }
+      ],
+      "impact_counts": {
+        "Medium": 4
+      },
+      "feature_mentions": {
+        "ideas": 4,
+        "concepting": 4,
+        "designed": 4,
+        "expand": 4,
+        "refine": 4,
+        "ai-powered": 4,
+        "board": 4,
+        "experimental,": 4,
+        "explore,": 4,
+        "mixboard": 4
+      }
+    }
+  },
+  "statistics": {
+    "total_competitors": 8,
+    "competitors_with_history": 6,
+    "total_updates_tracked": 41,
+    "last_check": "2025-10-04T14:56:19.238821"
+  }
+}

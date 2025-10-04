@@ -1,0 +1,16 @@
+{
+  "check_interval_hours": 24,
+  "enable_scheduling": false,
+  "notification_email": "ashutoshsononey@gmail.com",
+  "smtp_server": "smtp.gmail.com",
+  "smtp_port": 587,
+  "smtp_username": "ashutoshsononey@gmail.com",
+  "smtp_password": "eial vfct ewid xqbj",
+  "max_updates_per_competitor": 5,
+  "min_impact_level": "Low",
+  "digest_format": "detailed",
+  "notify_on_critical": true,
+  "notify_on_high": true,
+  "export_after_check": false,
+  "rate_limit_seconds": 2
+}

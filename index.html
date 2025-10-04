@@ -1,0 +1,2021 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IntelTracker - Competitive Intelligence Dashboard</title>
+    <style>
+.message.assistant .message-content {
+    background: #f5f5f5;
+    color: #333;
+    text-align: left;
+    line-height: 1.6;
+}
+
+.message.assistant .message-content h1,
+.message.assistant .message-content h2,
+.message.assistant .message-content h3,
+.message.assistant .message-content h4 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+.message.assistant .message-content h1:first-child,
+.message.assistant .message-content h2:first-child,
+.message.assistant .message-content h3:first-child {
+    margin-top: 0;
+}
+
+.message.assistant .message-content ul,
+.message.assistant .message-content ol {
+    margin: 12px 0;
+    padding-left: 24px;
+}
+
+.message.assistant .message-content li {
+    margin: 4px 0;
+}
+
+.message.assistant .message-content pre {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.message.assistant .message-content code {
+    font-family: 'Courier New', Consolas, monospace;
+}
+
+.message.assistant .message-content table {
+    font-size: 13px;
+}
+
+.message.assistant .message-content blockquote {
+    margin: 12px 0;
+}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .nav-tab {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: #e0e0e0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .session-info {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .session-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .main-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            min-height: calc(100vh - 220px);
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 220px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 12px;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .message-label {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .monitoring-control {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            color: white;
+        }
+
+        .monitoring-control h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .monitoring-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .monitoring-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .monitoring-badge.active {
+            background: #4CAF50;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .toggle-btn:hover {
+            background: white;
+            transform: translateY(-1px);
+        }
+
+        .toggle-btn.stop {
+            background: rgba(255, 255, 255, 0.9);
+            color: #c33;
+        }
+
+        .interval-control {
+            margin-top: 12px;
+        }
+
+        .interval-control label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 6px;
+            opacity: 0.9;
+        }
+
+        .interval-control input {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .quick-action {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .quick-action:hover {
+            background: #fff;
+            border-color: #667eea;
+            transform: translateX(4px);
+        }
+
+        .quick-action h3 {
+            font-size: 14px;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .quick-action p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.online {
+            background: #4CAF50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading-dots span {
+            animation: blink 1.4s infinite both;
+            font-size: 24px;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border-left: 4px solid #c33;
+        }
+
+        /* Reports view */
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .report-card {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .report-card:hover {
+            border-color: #667eea;
+            background: #fff;
+        }
+
+        .report-card h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+
+        /* Report viewer */
+        .report-viewer {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-height: calc(100vh - 280px);
+            overflow-y: auto;
+        }
+
+        .report-content {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .report-content h1 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #667eea;
+        }
+
+        .report-content h2 {
+            font-size: 20px;
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: #764ba2;
+        }
+
+        .report-content h3 {
+            font-size: 16px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+
+        .report-content p {
+            margin-bottom: 12px;
+        }
+
+        .report-content ul, .report-content ol {
+            margin-left: 24px;
+            margin-bottom: 12px;
+        }
+
+        .report-content li {
+            margin-bottom: 4px;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <div>
+                    <h1>IntelTracker</h1>
+                    <p>AI-Powered Competitive Intelligence Platform</p>
+                </div>
+                <div class="session-info">
+                    <div class="session-badge">
+                        <span class="status-indicator online"></span>
+                        Connected
+                    </div>
+                    <div class="session-badge" id="sessionBadge">Session: Loading...</div>
+                </div>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="chat">Chat Assistant</button>
+                <button class="nav-tab" data-tab="reports">Reports</button>
+                <button class="nav-tab" data-tab="competitors">Competitors</button>
+                <button class="nav-tab" data-tab="config">Configuration</button>
+                <button class="nav-tab" data-tab="exports">Exports</button>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <!-- Chat Tab -->
+            <div class="main-panel">
+                <div id="chatTab" class="tab-content active">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message assistant">
+                                <div class="message-label">IntelTracker Assistant</div>
+                                <div class="message-content">Welcome to IntelTracker! I'm your AI competitive intelligence assistant. I can help you monitor competitors, analyze their moves, and provide strategic insights. Try asking me to check competitors, add new ones, or configure your settings!</div>
+                            </div>
+                        </div>
+
+                        <div class="loading" id="loading">
+                            <div class="loading-dots">
+                                <span>●</span>
+                                <span>●</span>
+                                <span>●</span>
+                            </div>
+                            <p>Analyzing...</p>
+                        </div>
+
+                        <div id="errorContainer"></div>
+
+                        <div class="input-area">
+                            <input 
+                                type="text" 
+                                id="messageInput" 
+                                placeholder="Ask me anything about your competitors..."
+                                autocomplete="off"
+                            />
+                            <button class="btn btn-primary" id="sendBtn">Send</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reportsTab" class="tab-content">
+                    <div id="reportsListView">
+                        <h2 style="margin-bottom: 20px;">Intelligence Reports</h2>
+                        <div id="reportsList" class="reports-list">
+                            <p style="text-align: center; color: #999; padding: 40px;">Loading reports...</p>
+                        </div>
+                    </div>
+                    <div id="reportViewer" class="report-viewer" style="display: none;">
+                        <div class="report-header">
+                            <h2 id="reportTitle">Report</h2>
+                            <button class="btn btn-secondary btn-small" id="backToReports">← Back to Reports</button>
+                        </div>
+                        <div id="reportContent" class="report-content"></div>
+                    </div>
+                </div>
+
+                <!-- Competitors Tab -->
+                <div id="competitorsTab" class="tab-content">
+                    <h2 style="margin-bottom: 20px;">Competitor Tracking</h2>
+                    <div id="competitorsList">
+                        <p style="text-align: center; color: #999; padding: 40px;">Loading competitors...</p>
+                    </div>
+                </div>
+
+                <!-- Configuration Tab -->
+                <div id="configTab" class="tab-content">
+                    <h2 style="margin-bottom: 20px;">Configuration</h2>
+                    
+                    <div style="display: grid; gap: 24px;">
+                        <!-- Company Context -->
+                        <div style="background: white; padding: 20px; border-radius: 12px; border: 2px solid #f0f0f0;">
+                            <h3 style="margin-bottom: 16px; color: #667eea;">Company Context</h3>
+                            <div id="companyContextForm"></div>
+                            <button class="btn btn-primary" id="saveCompanyContext" style="margin-top: 16px;">Save Company Context</button>
+                        </div>
+
+                        <!-- Email Configuration -->
+                        <div style="background: white; padding: 20px; border-radius: 12px; border: 2px solid #f0f0f0;">
+                            <h3 style="margin-bottom: 16px; color: #667eea;">Email Notifications</h3>
+                            <div id="emailConfigForm"></div>
+                            <button class="btn btn-primary" id="saveEmailConfig" style="margin-top: 16px;">Save Email Config</button>
+                            <button class="btn btn-secondary" id="testEmail" style="margin-top: 16px; margin-left: 8px;">Send Test Email</button>
+                        </div>
+
+                        <!-- Monitoring Settings -->
+                        <div style="background: white; padding: 20px; border-radius: 12px; border: 2px solid #f0f0f0;">
+                            <h3 style="margin-bottom: 16px; color: #667eea;">Monitoring Settings</h3>
+                            <div id="monitoringConfigForm"></div>
+                            <button class="btn btn-primary" id="saveMonitoringConfig" style="margin-top: 16px;">Save Monitoring Config</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exports Tab -->
+                <div id="exportsTab" class="tab-content">
+                    <h2 style="margin-bottom: 20px;">Exports & Data</h2>
+                    <div id="exportsList">
+                        <p style="text-align: center; color: #999; padding: 40px;">Loading exports...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="monitoring-control">
+                    <h3>Auto-Monitoring</h3>
+                    <div class="monitoring-status">
+                        <span id="monitoringStatus">Status: Stopped</span>
+                        <span class="monitoring-badge" id="monitoringBadge">Inactive</span>
+                    </div>
+                    <button class="toggle-btn" id="toggleMonitoring">Start Monitoring</button>
+                    <div class="interval-control">
+                        <label>Check Interval (minutes):</label>
+                        <input type="number" id="intervalInput" value="60" min="1" max="1440" />
+                    </div>
+                </div>
+
+                <h2>Quick Actions</h2>
+                
+                <div class="quick-action" data-action="run_intelligence_check()">
+                    <h3>Run Intelligence Check</h3>
+                    <p>Monitor all competitors now</p>
+                </div>
+
+
+                <div class="quick-action" data-action="get_status()">
+                    <h3>System Status</h3>
+                    <p>View configuration and health</p>
+                </div>
+
+
+                <div class="quick-action" data-action="reset_cache(confirm=True)">
+                    <h3>Clear Cache</h3>
+                    <p>Reset content baseline</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+const API_BASE = 'http://127.0.0.1:8000';
+const APP_NAME = 'IntelTracker';
+const USER_ID = 'u_' + Math.random().toString(36).substr(2, 9);
+const SESSION_ID = 's_' + Math.random().toString(36).substr(2, 9);
+
+const chatMessages = document.getElementById('chatMessages');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const loading = document.getElementById('loading');
+const errorContainer = document.getElementById('errorContainer');
+const sessionBadge = document.getElementById('sessionBadge');
+
+// Monitoring loop state
+let monitoringInterval = null;
+let isMonitoring = false;
+let nextCheckTime = null;
+
+const monitoringStatus = document.getElementById('monitoringStatus');
+const monitoringBadge = document.getElementById('monitoringBadge');
+const toggleBtn = document.getElementById('toggleMonitoring');
+const intervalInput = document.getElementById('intervalInput');
+
+sessionBadge.textContent = `Session: ${SESSION_ID.substr(0, 8)}...`;
+async function loadCompetitors() {
+    const competitorsList = document.getElementById('competitorsList');
+    competitorsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Loading competitors...</p>';
+
+    try {
+        const response = await fetch('./data/competitors.json');
+        if (!response.ok) throw new Error('Failed to load competitors');
+
+        const competitors = await response.json();
+
+        const enabled = competitors.filter(c => c.enabled).length;
+        const disabled = competitors.length - enabled;
+
+        let html = '';
+        
+        // Overview section with Add button
+        html += `<div style="background: #f8f9fa; padding: 16px; border-radius: 10px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">`;
+        html += `<div>`;
+        html += `<h3 style="margin-bottom: 8px; font-size: 18px;">Overview</h3>`;
+        html += `<div style="display: flex; gap: 24px; font-size: 14px;">`;
+        html += `<div><strong>Total:</strong> ${competitors.length}</div>`;
+        html += `<div><strong>Active:</strong> <span style="color: #4CAF50;">${enabled}</span></div>`;
+        html += `<div><strong>Disabled:</strong> <span style="color: #999;">${disabled}</span></div>`;
+        html += `</div></div>`;
+        html += `<button class="btn btn-primary" id="addCompetitorBtn" style="padding: 10px 20px;">+ Add Competitor</button>`;
+        html += `</div>`;
+
+        // Add competitor form (hidden by default)
+        html += `<div id="addCompetitorForm" style="display: none; background: white; padding: 20px; border-radius: 10px; margin-bottom: 24px; border: 2px solid #667eea;">`;
+        html += `<h3 style="margin-bottom: 16px;">Add New Competitor</h3>`;
+        html += `<div style="display: grid; gap: 12px;">`;
+        html += `<div>`;
+        html += `<label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Company Name *</label>`;
+        html += `<input type="text" id="newCompName" placeholder="e.g., Acme Corp" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />`;
+        html += `</div>`;
+        html += `<div>`;
+        html += `<label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Website URL</label>`;
+        html += `<input type="text" id="newCompWebsite" placeholder="https://acme.com/blog" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />`;
+        html += `</div>`;
+        html += `<div>`;
+        html += `<label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">RSS Feed URL (recommended)</label>`;
+        html += `<input type="text" id="newCompRss" placeholder="https://acme.com/feed" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />`;
+        html += `</div>`;
+        html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">`;
+        html += `<div>`;
+        html += `<label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Category</label>`;
+        html += `<input type="text" id="newCompCategory" placeholder="e.g., SaaS, CRM" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />`;
+        html += `</div>`;
+        html += `<div>`;
+        html += `<label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Priority</label>`;
+        html += `<select id="newCompPriority" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">`;
+        html += `<option value="High">High</option>`;
+        html += `<option value="Medium" selected>Medium</option>`;
+        html += `<option value="Low">Low</option>`;
+        html += `</select>`;
+        html += `</div>`;
+        html += `</div>`;
+        html += `<div>`;
+        html += `<label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Tags (comma-separated)</label>`;
+        html += `<input type="text" id="newCompTags" placeholder="saas, enterprise, ai" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />`;
+        html += `</div>`;
+        html += `<div style="display: flex; gap: 8px; margin-top: 8px;">`;
+        html += `<button class="btn btn-primary" id="saveCompetitorBtn">Add Competitor</button>`;
+        html += `<button class="btn btn-secondary" id="cancelAddBtn">Cancel</button>`;
+        html += `</div>`;
+        html += `</div></div>`;
+
+        if (competitors.length === 0) {
+            html += '<p style="text-align: center; color: #999; padding: 40px;">No competitors yet. Click "Add Competitor" to get started!</p>';
+            competitorsList.innerHTML = html;
+            attachCompetitorEventListeners();
+            return;
+        }
+
+        // Group by priority
+        const byPriority = { High: [], Medium: [], Low: [] };
+        competitors.forEach(comp => {
+            if (byPriority[comp.priority]) {
+                byPriority[comp.priority].push(comp);
+            }
+        });
+
+        // Render by priority
+        ['High', 'Medium', 'Low'].forEach(priority => {
+            if (byPriority[priority].length > 0) {
+                const emoji = { High: '🔴', Medium: '🟡', Low: '🟢' }[priority];
+                html += `<h3 style="margin-top: 24px; margin-bottom: 16px; font-size: 18px;">${emoji} ${priority} Priority (${byPriority[priority].length})</h3>`;
+                
+                byPriority[priority].forEach(comp => {
+                    html += createCompetitorCard(comp);
+                });
+            }
+        });
+
+        competitorsList.innerHTML = html;
+        attachCompetitorEventListeners();
+
+    } catch (error) {
+        console.error('Failed to load competitors:', error);
+        competitorsList.innerHTML = '<p style="text-align: center; color: #c33; padding: 40px;">Failed to load competitors.json</p>';
+    }
+}
+
+function createCompetitorCard(comp) {
+    const statusBadge = comp.enabled 
+        ? '<span style="background: #4CAF50; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">ACTIVE</span>'
+        : '<span style="background: #999; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">DISABLED</span>';
+    
+    const lastChecked = comp.last_checked 
+        ? new Date(comp.last_checked).toLocaleString()
+        : 'Never';
+    
+    const sources = [];
+    if (comp.website_url) sources.push(`<a href="${comp.website_url}" target="_blank" style="color: #667eea;">Website</a>`);
+    if (comp.rss_feed_url) sources.push('RSS ⭐');
+    if (comp.twitter_handle) sources.push(`Twitter (@${comp.twitter_handle})`);
+    if (comp.linkedin_url) sources.push('LinkedIn');
+    
+    const tags = comp.tags.length > 0 
+        ? comp.tags.map(t => `<span style="background: #e0e0e0; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${t}</span>`).join(' ')
+        : '<span style="color: #999; font-size: 12px;">No tags</span>';
+
+    return `
+        <div style="background: white; padding: 16px; border-radius: 10px; margin-bottom: 12px; border: 2px solid #f0f0f0;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <h4 style="font-size: 16px; margin: 0;">${comp.name}</h4>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    ${statusBadge}
+                    <button class="btn btn-secondary btn-small toggle-comp" data-name="${comp.name}" style="padding: 4px 8px;">
+                        ${comp.enabled ? 'Disable' : 'Enable'}
+                    </button>
+                    <button class="btn btn-secondary btn-small remove-comp" data-name="${comp.name}" style="padding: 4px 8px; color: #c33;">
+                        Remove
+                    </button>
+                </div>
+            </div>
+            <div style="font-size: 13px; color: #666; line-height: 1.6;">
+                <div style="margin-bottom: 6px;"><strong>Category:</strong> ${comp.category}</div>
+                <div style="margin-bottom: 6px;"><strong>Sources:</strong> ${sources.join(', ') || 'None'}</div>
+                <div style="margin-bottom: 6px;"><strong>Tags:</strong> ${tags}</div>
+                <div style="margin-bottom: 6px;"><strong>Added:</strong> ${new Date(comp.added_at).toLocaleDateString()}</div>
+                <div><strong>Last Checked:</strong> ${lastChecked}</div>
+            </div>
+        </div>
+    `;
+}
+
+function attachCompetitorEventListeners() {
+    // Add competitor button
+    const addBtn = document.getElementById('addCompetitorBtn');
+    if (addBtn) {
+        addBtn.onclick = () => {
+            document.getElementById('addCompetitorForm').style.display = 'block';
+            document.getElementById('newCompName').focus();
+        };
+    }
+
+    // Cancel add
+    const cancelBtn = document.getElementById('cancelAddBtn');
+    if (cancelBtn) {
+        cancelBtn.onclick = () => {
+            document.getElementById('addCompetitorForm').style.display = 'none';
+            clearAddForm();
+        };
+    }
+
+    // Save new competitor
+    const saveBtn = document.getElementById('saveCompetitorBtn');
+    if (saveBtn) {
+        saveBtn.onclick = async () => {
+            const name = document.getElementById('newCompName').value.trim();
+            const website = document.getElementById('newCompWebsite').value.trim();
+            const rss = document.getElementById('newCompRss').value.trim();
+            const category = document.getElementById('newCompCategory').value.trim();
+            const priority = document.getElementById('newCompPriority').value;
+            const tags = document.getElementById('newCompTags').value.trim();
+
+            if (!name) {
+                alert('Company name is required');
+                return;
+            }
+
+            if (!website && !rss) {
+                alert('Please provide at least a website URL or RSS feed URL');
+                return;
+            }
+
+            let command = `add_competitor(\n    name='${name}'`;
+            if (website) command += `,\n    website_url='${website}'`;
+            if (rss) command += `,\n    rss_feed_url='${rss}'`;
+            if (category) command += `,\n    category='${category}'`;
+            command += `,\n    priority='${priority}'`;
+            if (tags) command += `,\n    tags='${tags}'`;
+            command += '\n)';
+
+            document.querySelector('[data-tab="chat"]').click();
+            await sendMessage(command);
+
+            // Hide form and clear
+            document.getElementById('addCompetitorForm').style.display = 'none';
+            clearAddForm();
+
+            // Reload after a delay
+            setTimeout(() => loadCompetitors(), 2000);
+        };
+    }
+
+    // Toggle competitors
+    document.querySelectorAll('.toggle-comp').forEach(btn => {
+        btn.onclick = async () => {
+            const name = btn.dataset.name;
+            document.querySelector('[data-tab="chat"]').click();
+            await sendMessage(`toggle_competitor('${name}')`);
+            setTimeout(() => loadCompetitors(), 1500);
+        };
+    });
+
+    // Remove competitors
+    document.querySelectorAll('.remove-comp').forEach(btn => {
+        btn.onclick = async () => {
+            const name = btn.dataset.name;
+            if (confirm(`Are you sure you want to remove "${name}" from tracking?\n\nThis will delete the competitor configuration. Historical data will be preserved.`)) {
+                document.querySelector('[data-tab="chat"]').click();
+                await sendMessage(`remove_competitor('${name}', confirm=True)`);
+                setTimeout(() => loadCompetitors(), 1500);
+            }
+        };
+    });
+}
+
+function clearAddForm() {
+    document.getElementById('newCompName').value = '';
+    document.getElementById('newCompWebsite').value = '';
+    document.getElementById('newCompRss').value = '';
+    document.getElementById('newCompCategory').value = '';
+    document.getElementById('newCompPriority').value = 'Medium';
+    document.getElementById('newCompTags').value = '';
+}
+async function loadConfiguration() {
+    // Load company context
+    try {
+        const contextResponse = await fetch('./data/company_context.json');
+        if (contextResponse.ok) {
+            const context = await contextResponse.json();
+            renderCompanyContextForm(context);
+        } else {
+            renderCompanyContextForm({});
+        }
+    } catch (e) {
+        console.error('Failed to load company context:', e);
+        renderCompanyContextForm({});
+    }
+
+    // Load email config
+    try {
+        const configResponse = await fetch('./data/config.json');
+        if (configResponse.ok) {
+            const config = await configResponse.json();
+            renderEmailConfigForm(config);
+            renderMonitoringConfigForm(config);
+        } else {
+            renderEmailConfigForm({});
+            renderMonitoringConfigForm({});
+        }
+    } catch (e) {
+        console.error('Failed to load config:', e);
+        renderEmailConfigForm({});
+        renderMonitoringConfigForm({});
+    }
+    
+    // NOW attach event listeners after forms are rendered
+    attachConfigEventListeners();
+}
+
+function renderCompanyContextForm(context) {
+    const form = document.getElementById('companyContextForm');
+    form.innerHTML = `
+        <div style="display: grid; gap: 12px;">
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Company Name</label>
+                <input type="text" id="companyName" value="${context.company_name || ''}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Product Name</label>
+                <input type="text" id="productName" value="${context.product_name || ''}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Industry</label>
+                <input type="text" id="industry" value="${context.industry || ''}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Target Market</label>
+                <input type="text" id="targetMarket" value="${context.target_market || ''}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Company Stage</label>
+                <select id="companyStage" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                    <option value="Startup" ${context.company_stage === 'Startup' ? 'selected' : ''}>Startup</option>
+                    <option value="Growth" ${context.company_stage === 'Growth' ? 'selected' : ''}>Growth</option>
+                    <option value="Established" ${context.company_stage === 'Established' ? 'selected' : ''}>Established</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Key Features (comma-separated)</label>
+                <textarea id="keyFeatures" rows="3" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">${(context.key_features || []).join(', ')}</textarea>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Differentiation</label>
+                <textarea id="differentiation" rows="3" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">${context.differentiation || ''}</textarea>
+            </div>
+        </div>
+    `;
+}
+
+function renderEmailConfigForm(config) {
+    const form = document.getElementById('emailConfigForm');
+    form.innerHTML = `
+        <div style="display: grid; gap: 12px;">
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Notification Email</label>
+                <input type="email" id="notificationEmail" value="${config.notification_email || ''}" 
+                    placeholder="alerts@yourcompany.com"
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">SMTP Server</label>
+                <input type="text" id="smtpServer" value="${config.smtp_server || 'smtp.gmail.com'}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">SMTP Port</label>
+                <input type="number" id="smtpPort" value="${config.smtp_port || 587}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">SMTP Username</label>
+                <input type="text" id="smtpUsername" value="${config.smtp_username || ''}" 
+                    placeholder="your@gmail.com"
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">SMTP Password</label>
+                <input type="password" id="smtpPassword" value="${config.smtp_password || ''}" 
+                    placeholder="App password for Gmail"
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+                <p style="font-size: 11px; color: #666; margin-top: 4px;">For Gmail, use an App Password from myaccount.google.com/apppasswords</p>
+            </div>
+            <div style="display: flex; gap: 16px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                    <input type="checkbox" id="notifyCritical" ${config.notify_on_critical ? 'checked' : ''} />
+                    Alert on Critical updates
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                    <input type="checkbox" id="notifyHigh" ${config.notify_on_high ? 'checked' : ''} />
+                    Alert on High impact
+                </label>
+            </div>
+        </div>
+    `;
+}
+
+function renderMonitoringConfigForm(config) {
+    const form = document.getElementById('monitoringConfigForm');
+    form.innerHTML = `
+        <div style="display: grid; gap: 12px;">
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Report Format</label>
+                <select id="digestFormat" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                    <option value="brief" ${config.digest_format === 'brief' ? 'selected' : ''}>Brief</option>
+                    <option value="summary" ${config.digest_format === 'summary' ? 'selected' : ''}>Summary</option>
+                    <option value="detailed" ${config.digest_format === 'detailed' ? 'selected' : ''}>Detailed</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Max Updates per Competitor</label>
+                <input type="number" id="maxUpdates" value="${config.max_updates_per_competitor || 5}" min="1" max="20"
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                    <input type="checkbox" id="exportAfterCheck" ${config.export_after_check ? 'checked' : ''} />
+                    Auto-export data after each check
+                </label>
+            </div>
+        </div>
+    `;
+}
+
+function attachConfigEventListeners() {
+    // Company context save button
+    const saveCompanyBtn = document.getElementById('saveCompanyContext');
+    if (saveCompanyBtn) {
+        saveCompanyBtn.onclick = async () => {
+            const contextData = `configure_company_context(
+                company_name='${document.getElementById('companyName').value}',
+                product_name='${document.getElementById('productName').value}',
+                industry='${document.getElementById('industry').value}',
+                target_market='${document.getElementById('targetMarket').value}',
+                company_stage='${document.getElementById('companyStage').value}',
+                key_features='${document.getElementById('keyFeatures').value}',
+                differentiation='${document.getElementById('differentiation').value}'
+            )`;
+            
+            document.querySelector('[data-tab="chat"]').click();
+            await sendMessage(contextData);
+        };
+    }
+
+    // Email config save button
+    const saveEmailBtn = document.getElementById('saveEmailConfig');
+    if (saveEmailBtn) {
+        saveEmailBtn.onclick = async () => {
+            const emailConfig = `configure_email_notifications(
+                email='${document.getElementById('notificationEmail').value}',
+                smtp_server='${document.getElementById('smtpServer').value}',
+                smtp_port=${document.getElementById('smtpPort').value},
+                smtp_username='${document.getElementById('smtpUsername').value}',
+                smtp_password='${document.getElementById('smtpPassword').value}',
+                notify_critical=${document.getElementById('notifyCritical').checked},
+                notify_high=${document.getElementById('notifyHigh').checked}
+            )`;
+            
+            document.querySelector('[data-tab="chat"]').click();
+            await sendMessage(emailConfig);
+        };
+    }
+
+    // Test email button
+    const testEmailBtn = document.getElementById('testEmail');
+    if (testEmailBtn) {
+        testEmailBtn.onclick = async () => {
+            document.querySelector('[data-tab="chat"]').click();
+            await sendMessage('test_email_notification()');
+        };
+    }
+
+    // Monitoring config save button
+    const saveMonitoringBtn = document.getElementById('saveMonitoringConfig');
+    if (saveMonitoringBtn) {
+        saveMonitoringBtn.onclick = async () => {
+            const monitoringConfig = `configure_monitoring(
+                digest_format='${document.getElementById('digestFormat').value}',
+                max_updates_per_competitor=${document.getElementById('maxUpdates').value},
+                export_after_check=${document.getElementById('exportAfterCheck').checked}
+            )`;
+            
+            document.querySelector('[data-tab="chat"]').click();
+            await sendMessage(monitoringConfig);
+        };
+    }
+}
+// Tab switching
+document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const tabName = tab.dataset.tab;
+        
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        
+        if (tabName === 'reports') {
+            loadReports();
+        } else if (tabName === 'competitors') {
+            loadCompetitors();
+        } else if (tabName === 'config') {
+            loadConfiguration();
+        } else if (tabName === 'exports') {
+            loadExports();
+        }
+    });
+});
+async function loadExports() {
+    const exportsList = document.getElementById('exportsList');
+    exportsList.innerHTML = `
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            <h3 style="margin-bottom: 12px;">Available Export Actions</h3>
+            <p style="color: #666; font-size: 14px; margin-bottom: 16px;">
+                Use these buttons to create exports, or view existing ones below.
+            </p>
+        </div>
+        
+        <div style="display: grid; gap: 12px; margin-bottom: 24px;">
+            <div class="quick-action" id="exportJsonFull">
+                <h3>Export JSON (Full)</h3>
+                <p>Complete data export with trends</p>
+            </div>
+            
+            <div class="quick-action" id="exportCsv">
+                <h3>Export CSV</h3>
+                <p>Spreadsheet-friendly format</p>
+            </div>
+            
+            <div class="quick-action" id="exportMarkdownFull">
+                <h3>Export Markdown (Full)</h3>
+                <p>Complete intelligence report in markdown</p>
+            </div>
+            
+            <div class="quick-action" id="exportSummaryMd">
+                <h3>Export Summary (Markdown)</h3>
+                <p>Competitor overview document</p>
+            </div>
+            
+            <div class="quick-action" id="exportSummaryJson">
+                <h3>Export Summary (JSON)</h3>
+                <p>Competitor overview data</p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h3 style="margin-bottom: 12px;">Recent Exports</h3>
+            <div id="exportFilesList">
+                <p style="text-align: center; color: #999; padding: 20px;">Loading exports...</p>
+            </div>
+        </div>
+    `;
+    
+    // Add click handlers for export buttons
+    document.getElementById('exportJsonFull').addEventListener('click', () => {
+        document.querySelector('[data-tab="chat"]').click();
+        sendMessage('export_intelligence_data(format="json", include_trends=True)');
+    });
+    
+    document.getElementById('exportCsv').addEventListener('click', () => {
+        document.querySelector('[data-tab="chat"]').click();
+        sendMessage('export_intelligence_data(format="csv")');
+    });
+    
+    document.getElementById('exportMarkdownFull').addEventListener('click', () => {
+        document.querySelector('[data-tab="chat"]').click();
+        sendMessage('Generate a full intelligence report and save it to exports');
+    });
+    
+    document.getElementById('exportSummaryMd').addEventListener('click', () => {
+        document.querySelector('[data-tab="chat"]').click();
+        sendMessage('export_competitor_summary(format="markdown")');
+    });
+    
+    document.getElementById('exportSummaryJson').addEventListener('click', () => {
+        document.querySelector('[data-tab="chat"]').click();
+        sendMessage('export_competitor_summary(format="json")');
+    });
+    
+    // Now load the actual files
+    await loadExportFilesList();
+}
+
+async function loadExportFilesList() {
+    const filesList = document.getElementById('exportFilesList');
+    
+    try {
+        const response = await fetch('./data/exports/');
+        
+        if (!response.ok) throw new Error('Failed to load exports directory');
+
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const links = doc.querySelectorAll('a');
+        
+        const files = Array.from(links)
+            .map(link => link.getAttribute('href'))
+            .filter(href => href && 
+                (href.endsWith('.json') || 
+                 href.endsWith('.md') || 
+                 href.endsWith('.csv')))
+            .sort()
+            .reverse();
+
+        if (files.length === 0) {
+            filesList.innerHTML = '<p style="font-size: 13px; color: #666; text-align: center; padding: 20px;">No exports yet. Create one using the actions above.</p>';
+            return;
+        }
+
+        filesList.innerHTML = files.map((filename) => {
+            const ext = filename.split('.').pop().toUpperCase();
+            const icon = ext === 'JSON' ? '📊' : ext === 'CSV' ? '📈' : '📄';
+            
+            let dateStr = 'Unknown date';
+            const match = filename.match(/(\d{8})_(\d{6})/);
+            if (match) {
+                const date = match[1];
+                const time = match[2];
+                dateStr = `${date.substr(0,4)}-${date.substr(4,2)}-${date.substr(6,2)} ${time.substr(0,2)}:${time.substr(2,2)}`;
+            }
+            
+            return `
+                <div style="background: white; padding: 12px 16px; border-radius: 8px; margin-bottom: 8px; border: 2px solid #f0f0f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <div>
+                            <span style="margin-right: 8px;">${icon}</span>
+                            <strong style="font-size: 13px;">${filename}</strong>
+                            <span style="margin-left: 8px; background: #e0e0e0; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${ext}</span>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            ${(ext === 'JSON' || ext === 'MD') ? `<button class="btn btn-secondary btn-small" onclick="viewExportFile('${filename}')">View</button>` : ''}
+                            <a href="./data/exports/${filename}" download class="btn btn-secondary btn-small">Download</a>
+                        </div>
+                    </div>
+                    <div style="font-size: 11px; color: #999;">
+                        Generated: ${dateStr}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Failed to list export files:', error);
+        filesList.innerHTML = '<p style="font-size: 13px; color: #c33; text-align: center; padding: 20px;">Failed to load exports.</p>';
+    }
+}
+
+async function viewExportFile(filename) {
+    const exportsList = document.getElementById('exportsList');
+    exportsList.innerHTML = '<p style="text-align: center; padding: 40px;">Loading export...</p>';
+    
+    try {
+        const response = await fetch(`./data/exports/${filename}`);
+        if (!response.ok) throw new Error('Failed to load export');
+        
+        const ext = filename.split('.').pop().toUpperCase();
+        let contentHtml = '';
+        
+        if (ext === 'JSON') {
+            // JSON viewing
+            const data = await response.json();
+            const formatted = JSON.stringify(data, null, 2);
+            contentHtml = `<pre style="background: #2d2d2d; color: #f8f8f2; padding: 20px; border-radius: 8px; overflow: auto; max-height: 600px; font-size: 12px; line-height: 1.4;">${formatted}</pre>`;
+        } else if (ext === 'MD') {
+            // Markdown viewing
+            const markdown = await response.text();
+            contentHtml = `<div class="report-content">${parseMarkdownEnhanced(markdown)}</div>`;
+        }
+        
+        exportsList.innerHTML = `
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3>${filename}</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="./data/exports/${filename}" download class="btn btn-secondary btn-small">Download</a>
+                        <button class="btn btn-secondary btn-small" onclick="loadExports()">← Back to Exports</button>
+                    </div>
+                </div>
+                ${contentHtml}
+            </div>
+        `;
+    } catch (error) {
+        console.error('Failed to view export:', error);
+        exportsList.innerHTML = `
+            <p style="text-align: center; color: #c33; padding: 40px;">Failed to load export file</p>
+            <div style="text-align: center;">
+                <button class="btn btn-secondary" onclick="loadExports()">← Back to Exports</button>
+            </div>
+        `;
+    }
+}
+
+function renderCompanyContextForm(context) {
+    const form = document.getElementById('companyContextForm');
+    form.innerHTML = `
+        <div style="display: grid; gap: 12px;">
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Company Name</label>
+                <input type="text" id="companyName" value="${context.company_name || ''}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Product Name</label>
+                <input type="text" id="productName" value="${context.product_name || ''}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Industry</label>
+                <input type="text" id="industry" value="${context.industry || ''}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Target Market</label>
+                <input type="text" id="targetMarket" value="${context.target_market || ''}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Company Stage</label>
+                <select id="companyStage" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                    <option value="Startup" ${context.company_stage === 'Startup' ? 'selected' : ''}>Startup</option>
+                    <option value="Growth" ${context.company_stage === 'Growth' ? 'selected' : ''}>Growth</option>
+                    <option value="Established" ${context.company_stage === 'Established' ? 'selected' : ''}>Established</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Key Features (comma-separated)</label>
+                <textarea id="keyFeatures" rows="3" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">${(context.key_features || []).join(', ')}</textarea>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Differentiation</label>
+                <textarea id="differentiation" rows="3" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">${context.differentiation || ''}</textarea>
+            </div>
+        </div>
+    `;
+}
+
+function renderEmailConfigForm(config) {
+    const form = document.getElementById('emailConfigForm');
+    form.innerHTML = `
+        <div style="display: grid; gap: 12px;">
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Notification Email</label>
+                <input type="email" id="notificationEmail" value="${config.notification_email || ''}" 
+                    placeholder="alerts@yourcompany.com"
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">SMTP Server</label>
+                <input type="text" id="smtpServer" value="${config.smtp_server || 'smtp.gmail.com'}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">SMTP Port</label>
+                <input type="number" id="smtpPort" value="${config.smtp_port || 587}" 
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">SMTP Username</label>
+                <input type="text" id="smtpUsername" value="${config.smtp_username || ''}" 
+                    placeholder="your@gmail.com"
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">SMTP Password</label>
+                <input type="password" id="smtpPassword" value="${config.smtp_password || ''}" 
+                    placeholder="App password for Gmail"
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+                <p style="font-size: 11px; color: #666; margin-top: 4px;">For Gmail, use an App Password from myaccount.google.com/apppasswords</p>
+            </div>
+            <div style="display: flex; gap: 16px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                    <input type="checkbox" id="notifyCritical" ${config.notify_on_critical ? 'checked' : ''} />
+                    Alert on Critical updates
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                    <input type="checkbox" id="notifyHigh" ${config.notify_on_high ? 'checked' : ''} />
+                    Alert on High impact
+                </label>
+            </div>
+        </div>
+    `;
+}
+
+function renderMonitoringConfigForm(config) {
+    const form = document.getElementById('monitoringConfigForm');
+    form.innerHTML = `
+        <div style="display: grid; gap: 12px;">
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Report Format</label>
+                <select id="digestFormat" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;">
+                    <option value="brief" ${config.digest_format === 'brief' ? 'selected' : ''}>Brief</option>
+                    <option value="summary" ${config.digest_format === 'summary' ? 'selected' : ''}>Summary</option>
+                    <option value="detailed" ${config.digest_format === 'detailed' ? 'selected' : ''}>Detailed</option>
+                </select>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 4px; font-weight: 600; font-size: 13px;">Max Updates per Competitor</label>
+                <input type="number" id="maxUpdates" value="${config.max_updates_per_competitor || 5}" min="1" max="20"
+                    style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" />
+            </div>
+            <div>
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                    <input type="checkbox" id="exportAfterCheck" ${config.export_after_check ? 'checked' : ''} />
+                    Auto-export data after each check
+                </label>
+            </div>
+        </div>
+    `;
+}
+
+// Button handlers
+document.getElementById('saveCompanyContext').addEventListener('click', async () => {
+    const contextData = `configure_company_context(
+        company_name='${document.getElementById('companyName').value}',
+        product_name='${document.getElementById('productName').value}',
+        industry='${document.getElementById('industry').value}',
+        target_market='${document.getElementById('targetMarket').value}',
+        company_stage='${document.getElementById('companyStage').value}',
+        key_features='${document.getElementById('keyFeatures').value}',
+        differentiation='${document.getElementById('differentiation').value}'
+    )`;
+    
+    document.querySelector('[data-tab="chat"]').click();
+    await sendMessage(contextData);
+});
+
+document.getElementById('saveEmailConfig').addEventListener('click', async () => {
+    const emailConfig = `configure_email_notifications(
+        email='${document.getElementById('notificationEmail').value}',
+        smtp_server='${document.getElementById('smtpServer').value}',
+        smtp_port=${document.getElementById('smtpPort').value},
+        smtp_username='${document.getElementById('smtpUsername').value}',
+        smtp_password='${document.getElementById('smtpPassword').value}',
+        notify_critical=${document.getElementById('notifyCritical').checked},
+        notify_high=${document.getElementById('notifyHigh').checked}
+    )`;
+    
+    document.querySelector('[data-tab="chat"]').click();
+    await sendMessage(emailConfig);
+});
+
+document.getElementById('testEmail').addEventListener('click', async () => {
+    document.querySelector('[data-tab="chat"]').click();
+    await sendMessage('test_email_notification()');
+});
+
+document.getElementById('saveMonitoringConfig').addEventListener('click', async () => {
+    const monitoringConfig = `configure_monitoring(
+        digest_format='${document.getElementById('digestFormat').value}',
+        max_updates_per_competitor=${document.getElementById('maxUpdates').value},
+        export_after_check=${document.getElementById('exportAfterCheck').checked}
+    )`;
+    
+    document.querySelector('[data-tab="chat"]').click();
+    await sendMessage(monitoringConfig);
+});
+
+
+        async function initSession() {
+            try {
+                const response = await fetch(`${API_BASE}/apps/${APP_NAME}/users/${USER_ID}/sessions/${SESSION_ID}`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'omit',
+                    body: JSON.stringify({ state: { initialized: true } })
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Session init failed:', response.status, errorText);
+                    throw new Error('Failed to initialize session');
+                }
+                console.log('Session initialized successfully');
+            } catch (error) {
+                showError('Failed to connect to backend. Check console for details.');
+                console.error('Session init error:', error);
+            }
+        }
+
+        async function sendMessage(text) {
+            if (!text.trim()) return;
+
+            addMessage('user', text);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            loading.classList.add('active');
+
+            try {
+                const response = await fetch(`${API_BASE}/run`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors',
+                    credentials: 'omit',
+                    body: JSON.stringify({
+                        app_name: APP_NAME,
+                        user_id: USER_ID,
+                        session_id: SESSION_ID,
+                        new_message: {
+                            role: 'user',
+                            parts: [{ text: text }]
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API request failed:', response.status, errorText);
+                    throw new Error(`API request failed: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Response:', data);
+
+                data.forEach(item => {
+                    if (item.content && item.content.role === 'model') {
+                        item.content.parts.forEach(part => {
+                            if (part.text) {
+                                addMessage('assistant', part.text);
+                            }
+                            if (part.functionCall) {
+                                addMessage('assistant', `Executing: ${part.functionCall.name}...`);
+                            }
+                        });
+                    }
+                    
+                    if (item.content && item.content.role === 'user') {
+                        item.content.parts.forEach(part => {
+                            if (part.functionResponse && part.functionResponse.response) {
+                                const result = part.functionResponse.response.result;
+                                if (result) {
+                                    addMessage('assistant', result);
+                                }
+                            }
+                        });
+                    }
+                });
+
+            } catch (error) {
+                showError('Failed to send message. Check console for details.');
+                console.error('Send error:', error);
+            } finally {
+                loading.classList.remove('active');
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+function addMessage(role, content) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}`;
+    
+    const label = document.createElement('div');
+    label.className = 'message-label';
+    label.textContent = role === 'user' ? 'You' : 'IntelTracker Assistant';
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    
+    // Render markdown for assistant messages, plain text for user
+    if (role === 'assistant') {
+        contentDiv.innerHTML = parseMarkdownEnhanced(content);
+    } else {
+        contentDiv.textContent = content;
+    }
+    
+    messageDiv.appendChild(label);
+    messageDiv.appendChild(contentDiv);
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+        function showError(message) {
+            errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+            setTimeout(() => {
+                errorContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        async function loadReports() {
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Loading reports...</p>';
+
+            try {
+                const response = await fetch('./data/reports/', {
+                    method: 'GET'
+                });
+
+                if (!response.ok) throw new Error('Failed to load reports');
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a');
+                
+                const reports = Array.from(links)
+                    .map(link => link.getAttribute('href'))
+                    .filter(href => href && href.endsWith('.md'))
+                    .sort()
+                    .reverse();
+
+                if (reports.length === 0) {
+                    reportsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No reports found. Run an intelligence check to generate your first report!</p>';
+                    return;
+                }
+
+                reportsList.innerHTML = '';
+                reports.forEach((filename, index) => {
+                    const card = createReportCard(filename, index + 1);
+                    reportsList.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Failed to load reports:', error);
+                reportsList.innerHTML = '<p style="text-align: center; color: #c33; padding: 40px;">Failed to load reports. Make sure the data/reports directory is accessible.</p>';
+            }
+        }
+
+        function createReportCard(filename, index) {
+            const card = document.createElement('div');
+            card.className = 'report-card';
+            
+            const match = filename.match(/intel_report_(\d{8})_(\d{6})\.md/);
+            let dateStr = 'Unknown date';
+            if (match) {
+                const date = match[1];
+                const time = match[2];
+                dateStr = `${date.substr(0,4)}-${date.substr(4,2)}-${date.substr(6,2)} at ${time.substr(0,2)}:${time.substr(2,2)}`;
+            }
+            
+            card.innerHTML = `
+                <h3>${index}. ${filename}</h3>
+                <div class="report-meta">
+                    <span>Generated: ${dateStr}</span>
+                </div>
+                <div class="report-actions">
+                    <button class="btn btn-primary btn-small view-report" data-file="${filename}">View Report</button>
+                    <button class="btn btn-secondary btn-small download-report" data-file="${filename}">Download</button>
+                </div>
+            `;
+            
+            card.querySelector('.view-report').addEventListener('click', (e) => {
+                e.stopPropagation();
+                viewReport(filename);
+            });
+            
+            card.querySelector('.download-report').addEventListener('click', (e) => {
+                e.stopPropagation();
+                downloadReport(filename);
+            });
+            
+            return card;
+        }
+
+        async function viewReport(filename) {
+            const viewer = document.getElementById('reportViewer');
+            const listView = document.getElementById('reportsListView');
+            const content = document.getElementById('reportContent');
+            const title = document.getElementById('reportTitle');
+            
+            content.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Loading report...</p>';
+            listView.style.display = 'none';
+            viewer.style.display = 'block';
+            title.textContent = filename;
+
+            try {
+                const response = await fetch(`./data/reports/${filename}`);
+                if (!response.ok) throw new Error('Failed to load report');
+                
+                const markdown = await response.text();
+                content.innerHTML = parseMarkdown(markdown);
+            } catch (error) {
+                console.error('Failed to view report:', error);
+                content.innerHTML = '<p style="text-align: center; color: #c33; padding: 40px;">Failed to load report content.</p>';
+            }
+        }
+
+        function parseMarkdown(markdown) {
+            let html = markdown;
+            
+            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = '<p>' + html + '</p>';
+            
+            return html;
+        }
+function parseMarkdownEnhanced(markdown) {
+    let html = markdown;
+    
+    // Escape HTML to prevent XSS
+    html = html.replace(/&/g, '&amp;')
+               .replace(/</g, '&lt;')
+               .replace(/>/g, '&gt;');
+    
+    // Code blocks (triple backticks)
+    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+        return `<pre style="background: #2d2d2d; color: #f8f8f2; padding: 16px; border-radius: 8px; overflow-x: auto; margin: 12px 0;"><code>${code.trim()}</code></pre>`;
+    });
+    
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code style="background: #f5f5f5; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em;">$1</code>');
+    
+    // Headers (must come before bold/italic)
+    html = html.replace(/^#### (.*$)/gim, '<h4 style="font-size: 15px; margin: 16px 0 8px 0; color: #333;">$1</h4>');
+    html = html.replace(/^### (.*$)/gim, '<h3 style="font-size: 16px; margin: 18px 0 10px 0; color: #667eea;">$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2 style="font-size: 18px; margin: 20px 0 12px 0; color: #764ba2;">$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1 style="font-size: 20px; margin: 20px 0 16px 0; color: #667eea;">$1</h1>');
+    
+    // Bold and italic
+    html = html.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #667eea; text-decoration: underline;">$1</a>');
+    
+    // Blockquotes
+    html = html.replace(/^&gt; (.*$)/gim, '<blockquote style="border-left: 4px solid #667eea; padding-left: 16px; margin: 12px 0; color: #666; font-style: italic;">$1</blockquote>');
+    
+    // Horizontal rules
+    html = html.replace(/^---$/gim, '<hr style="border: none; border-top: 2px solid #e0e0e0; margin: 20px 0;" />');
+    
+    // Lists - unordered
+    html = html.replace(/^\- (.*$)/gim, '<li style="margin-left: 20px;">$1</li>');
+    html = html.replace(/(<li[^>]*>.*<\/li>\n?)+/gim, '<ul style="margin: 12px 0; padding-left: 20px;">$&</ul>');
+    
+    // Lists - ordered
+    html = html.replace(/^\d+\. (.*$)/gim, '<li style="margin-left: 20px;">$1</li>');
+    
+    // Tables (basic support)
+    const tableRegex = /(\|[^\n]+\|\n\|[-:\s|]+\|\n(?:\|[^\n]+\|\n?)+)/g;
+    html = html.replace(tableRegex, (match) => {
+        const rows = match.trim().split('\n');
+        let table = '<table style="border-collapse: collapse; width: 100%; margin: 12px 0;"><thead>';
+        
+        // Header
+        const headers = rows[0].split('|').filter(cell => cell.trim());
+        table += '<tr>';
+        headers.forEach(header => {
+            table += `<th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5; text-align: left;">${header.trim()}</th>`;
+        });
+        table += '</tr></thead><tbody>';
+        
+        // Body rows (skip separator row)
+        for (let i = 2; i < rows.length; i++) {
+            const cells = rows[i].split('|').filter(cell => cell.trim());
+            table += '<tr>';
+            cells.forEach(cell => {
+                table += `<td style="border: 1px solid #ddd; padding: 8px;">${cell.trim()}</td>`;
+            });
+            table += '</tr>';
+        }
+        
+        table += '</tbody></table>';
+        return table;
+    });
+    
+    // Paragraphs - split on double newlines
+    html = html.split('\n\n').map(para => {
+        para = para.trim();
+        // Don't wrap if already wrapped in block element
+        if (!para.match(/^<(h\d|ul|ol|pre|blockquote|table|hr)/)) {
+            return `<p style="margin: 8px 0; line-height: 1.6;">${para}</p>`;
+        }
+        return para;
+    }).join('\n');
+    
+    // Single line breaks
+    html = html.replace(/\n(?!<)/g, '<br>');
+    
+    return html;
+}
+        function downloadReport(filename) {
+            const link = document.createElement('a');
+            link.href = `./data/reports/${filename}`;
+            link.download = filename;
+            link.click();
+        }
+
+        document.getElementById('backToReports').addEventListener('click', () => {
+            document.getElementById('reportViewer').style.display = 'none';
+            document.getElementById('reportsListView').style.display = 'block';
+        });
+
+
+        // Monitoring loop functions
+        function startMonitoring() {
+            const intervalMinutes = parseInt(intervalInput.value) || 60;
+            const intervalMs = intervalMinutes * 60 * 1000;
+
+            isMonitoring = true;
+            updateMonitoringUI();
+
+            runScheduledCheck();
+
+            monitoringInterval = setInterval(() => {
+                runScheduledCheck();
+            }, intervalMs);
+
+            addMessage('assistant', `Auto-monitoring started! Will check competitors every ${intervalMinutes} minutes.`);
+        }
+
+        function stopMonitoring() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+            }
+            isMonitoring = false;
+            nextCheckTime = null;
+            updateMonitoringUI();
+
+            addMessage('assistant', 'Auto-monitoring stopped.');
+        }
+
+        function updateMonitoringUI() {
+            if (isMonitoring) {
+                monitoringStatus.textContent = 'Status: Running';
+                monitoringBadge.textContent = 'Active';
+                monitoringBadge.classList.add('active');
+                toggleBtn.textContent = 'Stop Monitoring';
+                toggleBtn.classList.add('stop');
+                intervalInput.disabled = true;
+            } else {
+                monitoringStatus.textContent = 'Status: Stopped';
+                monitoringBadge.textContent = 'Inactive';
+                monitoringBadge.classList.remove('active');
+                toggleBtn.textContent = 'Start Monitoring';
+                toggleBtn.classList.remove('stop');
+                intervalInput.disabled = false;
+            }
+        }
+
+        async function runScheduledCheck() {
+            const timestamp = new Date().toLocaleTimeString();
+            
+            // Switch to chat tab for monitoring updates
+            document.querySelector('[data-tab="chat"]').click();
+            
+            addMessage('assistant', `[${timestamp}] Running scheduled intelligence check...`);
+            
+            await sendMessage('Run intelligence check for all competitors');
+            
+            const intervalMinutes = parseInt(intervalInput.value) || 60;
+            nextCheckTime = new Date(Date.now() + intervalMinutes * 60 * 1000);
+            
+            if (isMonitoring) {
+                addMessage('assistant', `Next check scheduled for: ${nextCheckTime.toLocaleTimeString()}`);
+            }
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            if (isMonitoring) {
+                stopMonitoring();
+            } else {
+                startMonitoring();
+            }
+        });
+
+        sendBtn.addEventListener('click', () => {
+            sendMessage(messageInput.value);
+        });
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(messageInput.value);
+            }
+        });
+
+        document.querySelectorAll('.quick-action').forEach(action => {
+            action.addEventListener('click', () => {
+                const actionText = action.dataset.action;
+                
+                // Switch to chat tab
+                document.querySelector('[data-tab="chat"]').click();
+                
+                messageInput.value = actionText;
+                sendMessage(actionText);
+            });
+        });
+
+        initSession();
+    </script>
+</body>
+</html>

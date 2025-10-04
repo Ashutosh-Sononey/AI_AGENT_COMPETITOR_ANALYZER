@@ -1,0 +1,52 @@
+{
+  "competitor_Linear": [
+    "964d9c2e14718ae7ccb6acb95905b9d0",
+    "735f2605b0412b68aeb8c36860785b1f",
+    "611328e903bdd21da144bf28bae6ff07",
+    "8964543d42a1dd09a87a8df01224c1e5",
+    "5f525f1f7d0aaa5ca810899de6e6d6bb",
+    "96c29bd56d7e9940fe426f74f79226fc",
+    "3acf6e3017c5e61685f460cd6ef26ba2",
+    "6350c6d56d0cd19e80fc6f817a185bb0",
+    "68f878c3dcfe038d958dda7abd002939",
+    "5e10a535abce5a67c592bc58f5592fe2"
+  ],
+  "competitor_Arattai": [
+    "3b15a9c70bd73cd6d19753e38c2d0140",
+    "041e6d2e5923005af26390ef50a24223",
+    "a3360ebcbfa4fd6596631b2b34680aa9",
+    "1276d0ee153ed8c4b5e5cb08a158fdae",
+    "e0498ae778e067fe5b6945b4e4b34afa"
+  ],
+  "competitor_Netlify": [
+    "16bfb619ca79df4fe68a95d8e29e3c73",
+    "7c0a849bc7d0787c23c67d281b861633",
+    "e630ca188ee49200696734297412d5f0",
+    "9baf56775105a827f8f8ea7990d5ea3e",
+    "25241dabbcd869c8d140fd00409eb6a7",
+    "e94f2ca5b35a2bf6bbcac224b008ec0f",
+    "8c866d3ae336e099de2bb10f4c7d1e56",
+    "5a17e3a4c727c3d9c7866a42e5466d1a",
+    "09941f06fc72969526833ee1eba99e8b",
+    "a701e05b4a475498a317247f5e9960fd"
+  ],
+  "competitor_Railway": [
+    "5026c062731d35fcb152c61ed43c49d9",
+    "73eb90d97947a1aba350029657351f4d",
+    "ffabd114ad0cc6ba20a8501dbbb20723",
+    "4aa051eb104aae70a598e1ba56312b8b"
+  ],
+  "competitor_Google": [
+    "004966ba754801067ba764f9b477a3b2",
+    "2773adb4d4b13f94d1ed796dcadf297c"
+  ],
+  "competitor_Notion": [
+    "0d26e4ada47a55ea24a69cee1652b68d",
+    "3748d99cbfce11765b07d747a614952a",
+    "983e2dc5430c83691e0e7850f1b9a584",
+    "73ffb59939f16840f80851c2f7d708da",
+    "61f720de475c08f176e6be2aa881bb7b",
+    "f35164952bce8a67ed0ce1638e6c77fa",
+    "c4e263bd403ac0946f4b030eabb3bc34"
+  ]
+}

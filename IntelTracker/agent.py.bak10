@@ -1,0 +1,668 @@
+# IntelTracker/agent.py (Version 10.3 - FINAL WORKING VERSION)
+# Gemini 2.5 Flash + proper ADK integration
+
+import os
+import json
+import hashlib
+import requests
+import feedparser
+import re
+from datetime import datetime
+from bs4 import BeautifulSoup
+from typing import Optional, TYPE_CHECKING
+from pathlib import Path
+
+# ADK Imports
+from google.adk.agents import LlmAgent
+from google.adk.tools import FunctionTool
+from google.adk.sessions import Session
+
+if TYPE_CHECKING:
+    from google.adk.tools import ToolContext
+
+# Gemini API
+try:
+    import google.generativeai as genai
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    if GEMINI_API_KEY:
+        genai.configure(api_key=GEMINI_API_KEY)
+        GEMINI_AVAILABLE = True
+    else:
+        GEMINI_AVAILABLE = False
+except ImportError:
+    GEMINI_AVAILABLE = False
+
+# --- Configuration ---
+DATA_DIR = Path("./data")
+DATA_DIR.mkdir(exist_ok=True)
+COMPETITORS_FILE = DATA_DIR / "competitors.json"
+CACHE_FILE = DATA_DIR / "content_cache.json"
+REPORTS_DIR = DATA_DIR / "reports"
+REPORTS_DIR.mkdir(exist_ok=True)
+
+# Default competitors
+DEFAULT_COMPETITORS = [
+    {
+        "name": "Notion",
+        "website_url": "https://www.notion.so/releases",
+        "rss_feed_url": "https://www.notion.so/releases/rss",
+        "category": "Productivity"
+    },
+    {
+        "name": "Linear",
+        "website_url": "https://linear.app/changelog",
+        "category": "Project Management"
+    },
+    {
+        "name": "Airtable",
+        "website_url": "https://www.airtable.com/whatsnew",
+        "category": "Database"
+    },
+]
+
+# --- Storage Functions ---
+def load_competitors() -> list:
+    if COMPETITORS_FILE.exists():
+        try:
+            with open(COMPETITORS_FILE, 'r') as f:
+                data = json.load(f)
+                if data:
+                    return data
+        except:
+            pass
+    save_competitors(DEFAULT_COMPETITORS.copy())
+    return DEFAULT_COMPETITORS.copy()
+
+def save_competitors(competitors: list) -> None:
+    with open(COMPETITORS_FILE, 'w') as f:
+        json.dump(competitors, f, indent=2)
+
+def load_cache() -> dict:
+    if CACHE_FILE.exists():
+        try:
+            with open(CACHE_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_cache(cache: dict) -> None:
+    with open(CACHE_FILE, 'w') as f:
+        json.dump(cache, f, indent=2)
+
+# --- Smart Content Extraction ---
+def _aggressive_clean(soup):
+    """Remove ALL the modern web garbage."""
+    # Kill tags completely
+    junk_tags = [
+        'script', 'style', 'nav', 'footer', 'header', 
+        'iframe', 'noscript', 'svg', 'path', 'img',
+        'button', 'input', 'select', 'form'  # Interactive elements
+    ]
+    for tag in soup(junk_tags):
+        tag.decompose()
+    
+    # Kill by class/id patterns
+    junk_patterns = [
+        'cookie', 'consent', 'popup', 'modal', 'banner',
+        'newsletter', 'subscribe', 'chat', 'widget',
+        'advertisement', 'ads', 'tracking', 'analytics',
+        'social', 'share', 'follow', 'menu', 'sidebar',
+        'filter', 'sort', 'switch', 'toggle', 'dropdown',  # UI controls
+        'breadcrumb', 'pagination', 'nav'
+    ]
+    for pattern in junk_patterns:
+        for tag in soup.find_all(class_=lambda c: c and pattern in str(c).lower()):
+            tag.decompose()
+        for tag in soup.find_all(id=lambda i: i and pattern in str(i).lower()):
+            tag.decompose()
+    
+    # Kill common attribute patterns (data-*, aria-*, etc)
+    for tag in soup.find_all(attrs={'role': True}):
+        if tag.get('role') in ['navigation', 'banner', 'complementary', 'contentinfo']:
+            tag.decompose()
+    
+    return soup
+
+def _is_valid_title(title: str) -> bool:
+    """Check if a title looks like actual content vs UI garbage."""
+    if not title or len(title) < 5:
+        return False
+    
+    # Reject if too many UI-ish words
+    ui_keywords = ['filter', 'sort', 'switch', 'toggle', 'show', 'hide', 'select', 'dropdown', 'menu']
+    ui_count = sum(1 for kw in ui_keywords if kw in title.lower())
+    if ui_count >= 2:
+        return False
+    
+    # Reject if title is just concatenated words without spaces
+    words = title.split()
+    if len(words) < 2 and len(title) > 20:  # Long string without spaces
+        return False
+    
+    # Reject if too many capital letters in middle of words (camelCase spam)
+    caps_in_middle = sum(1 for i, c in enumerate(title) if i > 0 and c.isupper() and title[i-1].islower())
+    if caps_in_middle > 3:
+        return False
+    
+    return True
+
+def _extract_structured_updates(soup, url: str) -> list:
+    """Extract only the actual content updates, aggressively filtered."""
+    updates = []
+    
+    main_content = soup.find(['main', 'article']) or soup.find(id=lambda i: i and 'content' in str(i).lower())
+    search_area = main_content if main_content else soup
+    
+    # Strategy 1: Find update-like structures
+    update_containers = search_area.find_all(
+        ['article', 'section', 'div'],
+        class_=lambda c: c and any(x in str(c).lower() for x in ['post', 'update', 'release', 'item', 'card', 'entry', 'news'])
+    )
+    
+    for container in update_containers[:8]:
+        title_elem = container.find(['h1', 'h2', 'h3', 'h4', 'a'])
+        if not title_elem:
+            continue
+        
+        title = title_elem.get_text(strip=True)
+        
+        # Validate title
+        if not _is_valid_title(title):
+            continue
+        
+        if len(title) > 200:
+            continue
+        
+        date = None
+        date_elem = container.find(['time', 'span'], class_=lambda c: c and 'date' in str(c).lower())
+        if date_elem:
+            date = date_elem.get_text(strip=True)
+        
+        content_parts = []
+        for p in container.find_all(['p', 'li'], limit=5):
+            text = p.get_text(strip=True)
+            if len(text) > 15 and _is_valid_title(text):  # Validate content too
+                content_parts.append(text)
+        
+        content = ' '.join(content_parts)[:500]
+        
+        if title and (content or len(updates) < 3):
+            updates.append({
+                'title': title,
+                'content': content if content else title,
+                'date': date
+            })
+    
+    # Strategy 2: Try headings (more aggressive)
+    if len(updates) < 3:
+        for heading in search_area.find_all(['h1', 'h2', 'h3'], limit=15):
+            title = heading.get_text(strip=True)
+            
+            if not _is_valid_title(title):
+                continue
+            
+            if len(title) > 150:
+                continue
+            
+            # Skip if already have this title
+            if any(u['title'] == title for u in updates):
+                continue
+            
+            content_parts = []
+            for sibling in heading.find_next_siblings(['p', 'ul', 'div'], limit=5):
+                text = sibling.get_text(strip=True)
+                if len(text) > 15 and _is_valid_title(text):
+                    content_parts.append(text)
+            
+            content = ' '.join(content_parts)[:500]
+            
+            if len(content) > 30 or (len(title) > 20 and len(updates) < 3):
+                updates.append({
+                    'title': title,
+                    'content': content if content else title,
+                    'date': None
+                })
+    
+    # Strategy 3: Last resort - just get any meaningful text blocks
+    if len(updates) == 0:
+        print("(trying fallback extraction)...", end=" ")
+        for elem in search_area.find_all(['div', 'section'], limit=20):
+            text = elem.get_text(strip=True)
+            if 50 < len(text) < 1000:
+                # Try to find a heading within
+                heading = elem.find(['h1', 'h2', 'h3', 'h4'])
+                title = heading.get_text(strip=True) if heading else text[:80]
+                
+                if not _is_valid_title(title):
+                    continue
+                
+                updates.append({
+                    'title': title,
+                    'content': text[:500],
+                    'date': None
+                })
+                
+                if len(updates) >= 3:
+                    break
+    
+    return updates[:5]
+
+def _extract_from_rss(url: str) -> list:
+    """Get updates from RSS feed."""
+    try:
+        feed = feedparser.parse(url)
+        if not feed.entries:
+            return []
+        
+        updates = []
+        for entry in feed.entries[:5]:
+            title = entry.get('title', 'Untitled')
+            summary = entry.get('summary', entry.get('description', ''))
+            
+            if summary:
+                summary = BeautifulSoup(summary, 'html.parser').get_text(strip=True)[:500]
+            
+            updates.append({
+                'title': title,
+                'content': summary,
+                'date': entry.get('published', None),
+                'link': entry.get('link', url)
+            })
+        
+        return updates
+    except:
+        return []
+
+# --- Analysis Functions ---
+def _analyze_with_gemini(competitor_name: str, updates: list) -> dict:
+    """Use Gemini 2.5 Flash to analyze updates."""
+    if not GEMINI_AVAILABLE or not updates:
+        return None
+    
+    try:
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        
+        # Build MINIMAL prompt
+        prompt = f"Competitor: {competitor_name}\n\nUpdates:\n"
+        for i, u in enumerate(updates[:3], 1):
+            prompt += f"{i}. {u['title']}\n"
+            content = u.get('content', '')[:200]
+            if content:
+                prompt += f"   {content}\n"
+        
+        prompt += """\nAnalyze briefly (JSON format):
+{
+  "summary": "1 sentence what changed",
+  "key_features": ["feature 1", "feature 2"],
+  "impact": "High/Medium/Low",
+  "action": "1 specific recommendation"
+}"""
+
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.3,
+                max_output_tokens=300
+            ),
+            safety_settings={
+                'HARM_CATEGORY_HARASSMENT': 'BLOCK_NONE',
+                'HARM_CATEGORY_HATE_SPEECH': 'BLOCK_NONE',
+                'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'BLOCK_NONE',
+                'HARM_CATEGORY_DANGEROUS_CONTENT': 'BLOCK_NONE',
+            }
+        )
+        
+        # Handle different response formats
+        if hasattr(response, 'text'):
+            text = response.text.strip()
+        elif hasattr(response, 'candidates') and response.candidates:
+            # Extract text from candidates if direct text access fails
+            candidate = response.candidates[0]
+            if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                text = ''.join(part.text for part in candidate.content.parts if hasattr(part, 'text'))
+            else:
+                raise Exception("No text in response")
+        else:
+            raise Exception("Response blocked or empty")
+        
+        text = re.sub(r'```json\s*|\s*```', '', text.strip())
+        
+        analysis = json.loads(text)
+        
+        return {
+            'summary': analysis.get('summary', 'Updated')[:200],
+            'key_features': analysis.get('key_features', [])[:3],
+            'impact': analysis.get('impact', 'Medium'),
+            'action': analysis.get('action', 'Review changes')[:150]
+        }
+        
+    except Exception as e:
+        print(f"⚠️  Gemini failed: {str(e)}")
+        return None
+
+def _basic_analysis(competitor_name: str, updates: list) -> dict:
+    """Basic analysis when Gemini unavailable."""
+    if not updates:
+        return {
+            'summary': f'{competitor_name} has updates',
+            'key_features': [],
+            'impact': 'Unknown',
+            'action': 'Review manually'
+        }
+    
+    titles = [u['title'] for u in updates[:3]]
+    
+    # Simple keyword analysis for impact
+    high_keywords = ['launch', 'new', 'major', 'pricing', 'acquire', 'partnership']
+    impact = 'Medium'
+    for title in titles:
+        if any(kw in title.lower() for kw in high_keywords):
+            impact = 'High'
+            break
+    
+    return {
+        'summary': f"{competitor_name}: {titles[0]}" if titles else f"{competitor_name} updated",
+        'key_features': titles,
+        'impact': impact,
+        'action': f"Review {competitor_name}'s latest updates"
+    }
+
+# --- Monitoring ---
+def _monitor_competitor(comp: dict) -> dict | None:
+    """Monitor a single competitor."""
+    name = comp['name']
+    
+    print(f"📊 Checking {name}...", end=" ")
+    
+    # Try RSS first
+    if comp.get('rss_feed_url'):
+        updates = _extract_from_rss(comp['rss_feed_url'])
+        if updates:
+            print(f"✅ {len(updates)} RSS updates", end=" ")
+            
+            cache = load_cache()
+            cache_key = f"rss_{name}"
+            seen_titles = cache.get(cache_key, [])
+            
+            new_updates = [u for u in updates if u['title'] not in seen_titles]
+            
+            if new_updates:
+                print(f"({len(new_updates)} new)")
+                # Analyze
+                analysis = _analyze_with_gemini(name, new_updates)
+                if not analysis:
+                    print(f"   Using basic analysis")
+                    analysis = _basic_analysis(name, new_updates)
+                
+                # Update cache
+                cache[cache_key] = [u['title'] for u in updates[:10]]
+                save_cache(cache)
+                
+                return {
+                    'competitor': name,
+                    'category': comp.get('category', 'Unknown'),
+                    'url': comp.get('rss_feed_url'),
+                    'updates': new_updates,
+                    'analysis': analysis
+                }
+            else:
+                print("(all seen)")
+                return None
+    
+    # Fallback to website scraping
+    url = comp.get('website_url')
+    if not url:
+        print("No URL")
+        return None
+    
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, timeout=10, headers=headers)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Debug: Check page size before cleaning
+        original_size = len(soup.get_text())
+        
+        soup = _aggressive_clean(soup)
+        
+        # Debug: Check page size after cleaning
+        cleaned_size = len(soup.get_text())
+        print(f"(page: {original_size//1000}kb → {cleaned_size//1000}kb)", end=" ")
+        
+        updates = _extract_structured_updates(soup, url)
+        
+        if not updates:
+            print("❌ No content extracted")
+            return None
+        
+        print(f"Found {len(updates)} updates...", end=" ")
+        
+        cache = load_cache()
+        cache_key = f"web_{name}"
+        titles_hash = hashlib.md5(
+            json.dumps([u['title'] for u in updates]).encode()
+        ).hexdigest()
+        
+        old_hash = cache.get(cache_key)
+        
+        if old_hash == titles_hash:
+            print("No changes")
+            return None
+        
+        print("✅ Changes detected")
+        
+        # Analyze
+        analysis = _analyze_with_gemini(name, updates)
+        if not analysis:
+            print(f"   Using basic analysis")
+            analysis = _basic_analysis(name, updates)
+        
+        # Update cache
+        cache[cache_key] = titles_hash
+        save_cache(cache)
+        
+        return {
+            'competitor': name,
+            'category': comp.get('category', 'Unknown'),
+            'url': url,
+            'updates': updates,
+            'analysis': analysis
+        }
+        
+    except Exception as e:
+        print(f"❌ Error: {str(e)[:50]}")
+        return None
+
+# --- Report Generation ---
+def generate_intelligence_report() -> tuple[str, int]:
+    """Generate competitive intelligence report."""
+    print(f"\n{'='*70}")
+    print(f"🔍 Competitive Intelligence Check")
+    print(f"   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"{'='*70}\n")
+    
+    if not GEMINI_AVAILABLE:
+        print("⚠️  Gemini API not configured - using basic analysis\n")
+    
+    competitors = load_competitors()
+    findings = []
+    
+    for comp in competitors:
+        result = _monitor_competitor(comp)
+        if result:
+            findings.append(result)
+    
+    if not findings:
+        print(f"\n✓ No changes detected\n")
+        return None, 0
+    
+    print(f"\n✅ Generating report with {len(findings)} updates\n")
+    
+    report = _build_report(findings)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_file = REPORTS_DIR / f"intel_{timestamp}.md"
+    with open(report_file, 'w') as f:
+        f.write(report)
+    
+    print(f"💾 Saved: {report_file}\n")
+    
+    return report, len(findings)
+
+def _build_report(findings: list) -> str:
+    """Build formatted intelligence report."""
+    report = f"# 🎯 Competitive Intelligence Report\n\n"
+    report += f"**{datetime.now().strftime('%B %d, %Y at %I:%M %p')}**\n\n"
+    
+    report += "## 📋 Summary\n\n"
+    for f in findings:
+        report += f"**{f['competitor']}:** {f['analysis']['summary']}\n\n"
+    
+    report += "---\n\n"
+    
+    report += "## 🔍 Detailed Analysis\n\n"
+    
+    for f in findings:
+        name = f['competitor']
+        analysis = f['analysis']
+        
+        report += f"### {name} ({f['category']})\n\n"
+        
+        impact = analysis.get('impact', 'Medium')
+        if impact == 'High':
+            report += "🔴 **HIGH IMPACT**\n\n"
+        elif impact == 'Medium':
+            report += "🟡 **MEDIUM IMPACT**\n\n"
+        else:
+            report += "🟢 **LOW IMPACT**\n\n"
+        
+        features = analysis.get('key_features', [])
+        if features:
+            report += "**What's New:**\n"
+            for feat in features:
+                report += f"- {feat}\n"
+            report += "\n"
+        
+        action = analysis.get('action', '')
+        if action:
+            report += f"**Recommended Action:** {action}\n\n"
+        
+        if len(f['updates']) > 0:
+            report += "<details>\n<summary>View Details</summary>\n\n"
+            for u in f['updates'][:3]:
+                report += f"**{u['title']}**\n"
+                if u.get('date'):
+                    report += f"*{u['date']}*\n"
+                if u.get('content'):
+                    report += f"\n{u['content'][:300]}...\n"
+                report += "\n"
+            report += "</details>\n\n"
+        
+        report += f"[View Source →]({f['url']})\n\n"
+        report += "---\n\n"
+    
+    return report
+
+# --- Tools ---
+@FunctionTool
+def monitor_competitors(tool_context: "ToolContext") -> str:
+    """Check competitors and show intelligence report."""
+    report, count = generate_intelligence_report()
+    
+    if report is None:
+        return "No changes detected."
+    
+    return f"🎯 **{count} Updates Found**\n\n{report}"
+
+@FunctionTool
+def add_competitor(
+    name: str,
+    website_url: str,
+    tool_context: "ToolContext",
+    rss_feed_url: Optional[str] = None,
+    category: Optional[str] = None
+) -> str:
+    """Add competitor to track."""
+    competitors = load_competitors()
+    
+    if any(c['name'].lower() == name.lower() for c in competitors):
+        return f"'{name}' already tracked."
+    
+    new_comp = {
+        "name": name,
+        "website_url": website_url,
+        "category": category or "Unknown",
+        "added_at": datetime.now().isoformat()
+    }
+    if rss_feed_url:
+        new_comp["rss_feed_url"] = rss_feed_url
+    
+    competitors.append(new_comp)
+    save_competitors(competitors)
+    
+    return f"✅ Added '{name}'."
+
+@FunctionTool
+def list_competitors(tool_context: "ToolContext") -> str:
+    """Show tracked competitors."""
+    competitors = load_competitors()
+    
+    if not competitors:
+        return "No competitors tracked."
+    
+    result = f"**Tracking {len(competitors)} competitors:**\n\n"
+    for comp in competitors:
+        result += f"• **{comp['name']}** ({comp.get('category', 'Unknown')})\n"
+        result += f"  {comp['website_url']}\n"
+    
+    return result
+
+@FunctionTool
+def remove_competitor(name: str, tool_context: "ToolContext") -> str:
+    """Remove competitor."""
+    competitors = load_competitors()
+    competitors = [c for c in competitors if c['name'].lower() != name.lower()]
+    save_competitors(competitors)
+    return f"✅ Removed '{name}'."
+
+@FunctionTool
+def reset_baseline(tool_context: "ToolContext") -> str:
+    """Reset baseline."""
+    cache = load_cache()
+    cache.clear()
+    save_cache(cache)
+    return "✅ Baseline reset."
+
+# --- Agent ---
+root_agent = LlmAgent(
+    name="intel_tracker",
+    model="gemini-2.5-flash",
+    instruction="""You're IntelTracker, a competitive intelligence assistant.
+
+Commands:
+- monitor → Check for updates and analyze
+- add [Name] at [URL] → Track competitor
+- list → Show tracked competitors
+- remove [Name] → Stop tracking
+- reset baseline → Clear history
+
+If Gemini analysis is unavailable, you'll fall back to basic analysis.
+Show full reports in chat. Be concise.""",
+    tools=[
+        monitor_competitors,
+        add_competitor,
+        list_competitors,
+        remove_competitor,
+        reset_baseline
+    ],
+)
+
+if __name__ == "__main__":
+    print("🚀 IntelTracker v10.3 - Production Ready")
+    report, count = generate_intelligence_report()
+    if report:
+        print(f"\n{report}")
+    print("\n✅ Ready!")
